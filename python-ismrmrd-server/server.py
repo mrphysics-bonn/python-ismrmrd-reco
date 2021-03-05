@@ -7,10 +7,6 @@ import logging
 import multiprocessing
 import ismrmrd.xsd
 
-import simplefft
-import invertcontrast
-import analyzeflow
-
 class Server:
     """
     Something something docstring.
@@ -74,37 +70,12 @@ class Server:
 
             # Decide what program to use based on config
             # As a shortcut, we accept the file name as text too.
-            if (config == "simplefft"):
-                logging.info("Starting simplefft processing based on config")
-                simplefft.process(connection, config, metadata)
-            elif (config == "bart_pics"):
-                import bart_pics
-                logging.info("Starting simplefft_bart processing based on config")
-                bart_pics.process(connection, config, metadata)
-            elif (config == "bart_spiral"):
-                import bart_spiral
-                import importlib
-                importlib.reload(bart_spiral)
-                logging.info("Starting bart_spiral processing based on config")
-                bart_spiral.process(connection, config, metadata)
-            elif (config == "bart_pulseq"):
+            if (config == "bart_pulseq"):
                 import bart_pulseq
                 import importlib
                 importlib.reload(bart_pulseq)
                 logging.info("Starting bart_pulseq processing based on config")
                 bart_pulseq.process(connection, config, metadata)
-            elif (config == "powergrid_pulseq"):
-                import powergrid_pulseq
-                import importlib
-                importlib.reload(powergrid_pulseq)
-                logging.info("Starting powergrid_pulseq processing based on config")
-                powergrid_pulseq.process(connection, config, metadata)
-            elif (config == "invertcontrast"):
-                logging.info("Starting invertcontrast processing based on config")
-                invertcontrast.process(connection, config, metadata)
-            elif (config == "analyzeflow"):
-                logging.info("Starting analyzeflow processing based on config")
-                analyzeflow.process(connection, config, metadata)
             elif (config == "null"):
                 logging.info("No processing based on config")
                 try:

@@ -15,9 +15,9 @@ For file size reasons only one slice & noise data is stored in the example data.
 ## Reconstruction via Gadgetron ISMRMRD Client
 
 Reconstruction can be started via the script send_data.sh:
-- install Gadgetron (https://github.com/gadgetron/gadgetron)
-- install ismrmrd and siemens_to_ismrmrd (https://github.com/ismrmrd/siemens_to_ismrmrd)
-- usage in terminal for example data: send_data.sh "ismrmrd_file/siemens_twix_file"
+- Install Gadgetron (https://github.com/gadgetron/gadgetron)
+- Optional: Install ismrmrd and siemens_to_ismrmrd (https://github.com/ismrmrd/siemens_to_ismrmrd) for Siemens datasets
+- Usage in terminal for example data: send_data.sh "ismrmrd_file/siemens_twix_file"
 
 ## Reconstruction of Pulseq data
 

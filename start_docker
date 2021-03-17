@@ -9,6 +9,6 @@ fi
 dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
 echo $dir
-docker run -it -p 9002:9002 -v $dir:/tmp/share -v $dir/python-ismrmrd-server:/opt/code/python-ismrmrd-server --rm $TAG bash
+docker run -it --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share -v $dir/python-ismrmrd-server:/opt/code/python-ismrmrd-server --rm $TAG bash
 
 

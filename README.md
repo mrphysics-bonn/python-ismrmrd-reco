@@ -7,7 +7,7 @@ For file size reasons the example data contains only one slice & noise data. Rec
 
 ## Set up docker image and start server
 - Clone the repository and do `git submodule update --init`
-- Install docker and add user to docker group (`sudo groupadd docker`, `sudo usermod -aG docker username` and `newgrp docker`)
+- Install docker and add user to docker group (`sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker`)
 - Run `./build_docker.sh` from the project folder
 - Run `./start_docker` from the project folder
 - Run `start_server` within docker container

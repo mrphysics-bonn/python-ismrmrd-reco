@@ -7,7 +7,7 @@ For file size reasons the example data contains only one slice & noise data. Rec
 
 ## Set up docker image and start server
 - Clone the repository and do `git submodule update --init`
-- Install docker and add user to docker group (`sudo usermod -aG docker username` and `newgrp docker`)
+- Install docker and add user to docker group (`sudo groupadd docker`, `sudo usermod -aG docker username` and `newgrp docker`)
 - Run `./build_docker`
 - Run `./start_docker`
 - Run `start_server` within docker container
@@ -17,9 +17,9 @@ For file size reasons the example data contains only one slice & noise data. Rec
 
 Reconstruction can be started via the script send_data.sh:
 - Install Gadgetron (https://github.com/gadgetron/gadgetron)
-- Optional: Install ismrmrd and siemens_to_ismrmrd (https://github.com/ismrmrd/siemens_to_ismrmrd) for Siemens datasets
-- Usage in terminal for example data: send_data.sh "ismrmrd_file/siemens_twix_file"
-
+- Optional for Siemens Twix files: Install ismrmrd and siemens_to_ismrmrd (https://github.com/ismrmrd/siemens_to_ismrmrd) for Siemens datasets
+- There is a convience script "send_data.sh" for sending the data to the client in the project folder. Usage: ./send_data.sh "ismrmrd_file/siemens_twix_file"
+- To run the example dataset, start the docker container and the server as described above and execute from the project folder: `./send_data.sh example_data/pulseq_gre_dataset.h5`
 ## Reconstruction of Pulseq data
 
 For reconstruction of Pulseq data, an additional protocol file has to be provided. This protocol file has to contain all necessary information for reconstruction such as counters, flags and other metadata.

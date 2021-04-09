@@ -8,8 +8,8 @@ For file size reasons the example data contains only one slice & noise data. Rec
 ## Set up docker image and start server
 - Clone the repository and do `git submodule update --init`
 - Install docker and add user to docker group (`sudo groupadd docker`, `sudo usermod -aG docker username` and `newgrp docker`)
-- Run `./build_docker`
-- Run `./start_docker`
+- Run `./build_docker` from the project folder
+- Run `./start_docker` from the project folder
 - Run `start_server` within docker container
 - Results (in npy format) and a log file are stored in the `debug` folder
 

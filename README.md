@@ -23,7 +23,7 @@ Reconstruction can be started via the script send_data.sh:
 ## Reconstruction of Pulseq data
 
 For reconstruction of Pulseq data, an additional protocol file has to be provided. This protocol file has to contain all necessary information for reconstruction such as counters, flags and other metadata.
-The protocol file has to be located in "dependency/pulseq_protocols". The protocol file name has to be stored in the tFree parameter of the Siemens protocol. The necessary parameters for a reconstruction are listed in the functions "insert_hdr" and "insert_acq" in "bart_pulseq.py".
+The protocol file has to be located in "dependency/pulseq_protocols". The protocol file name has to be stored in the free text parameter "tFree" of the protocol, if the sequence is executed on a Siemens scanner. The protocol name is transferred to the first user defined string parameter of the ISMRMRD file by the siemens_to_ismrmrd convertert. The necessary parameters for a reconstruction are listed in the functions "insert_hdr" and "insert_acq" in "bart_pulseq.py".
 
 ## References
 

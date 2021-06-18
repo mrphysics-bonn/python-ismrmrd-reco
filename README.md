@@ -13,13 +13,18 @@ For file size reasons the example data contains only one slice & noise data. Rec
 - Run `start_server` within docker container
 - Results (in npy format) and a log file are stored in the `debug` folder
 
-## Sending data via Gadgetron ISMRMRD Client
+## Sending data via Client
 
-Reconstruction can be started via the script send_data.sh:
-- Install Gadgetron (https://github.com/gadgetron/gadgetron)
-- Optional for Siemens Twix files: Install ismrmrd and siemens_to_ismrmrd (https://github.com/ismrmrd/siemens_to_ismrmrd) for Siemens datasets
-- There is a convience script "send_data.sh" for sending the data to the client in the project folder. Usage: ./send_data.sh "ismrmrd_file/siemens_twix_file"
-- To run the example dataset, start the docker container and the server as described above and execute from the project folder: `./send_data.sh example_data/pulseq_gre_dataset.h5`
+Reconstruction can be started via 2 options:
+1. Use the provided `client.py` from the python-ismrmrd-server folder:
+2. Use the Gadgetron ISMRMRD Client (Gadgetron has to be installed: https://github.com/gadgetron/gadgetron)
+
+Via `client.py`:
+- Run `python client.py -c bart_pulseq ../example_data/pulseq_gre_dataset.h5`. The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script.
+
+Via Gadgetron ISMRMRD client:
+- Reconstruction can be started via the script `send_data.sh`, run `./send_data.sh example_data/pulseq_gre_dataset.h5` from the project folder
+- Optional for Siemens Twix files: Install ismrmrd and siemens_to_ismrmrd (https://github.com/ismrmrd/siemens_to_ismrmrd) for Siemens datasets. After installation, send_data.sh can also handle Siemens raw data acquired with the Pulseq sequence.
 ## Reconstruction of Pulseq data
 
 For reconstruction of Pulseq data, an additional protocol file has to be provided. This protocol file has to contain all necessary information for reconstruction such as counters, flags and other metadata.

@@ -23,4 +23,4 @@ if [[ $IN_FILE == *.dat ]]; then
     IN_FILE="/tmp/tmp.h5"
 fi
 
-client.py -a 127.0.0.1 -c bart_pulseq -o $OUT_FILE -G images $IN_FILE
+client.py -a 127.0.0.1 -c bart_jemris -o $OUT_FILE -G images $IN_FILE

@@ -10,6 +10,7 @@ fi
 
 if [ "$#" -lt 2 ]; then
     OUT_FILE="debug/out.h5"
+    rm $OUT_FILE
 else
     OUT_FILE="$2"
 fi
@@ -22,4 +23,4 @@ if [[ $IN_FILE == *.dat ]]; then
     IN_FILE="/tmp/tmp.h5"
 fi
 
-gadgetron_ismrmrd_client -a 127.0.0.1 -c bart_pulseq -f $IN_FILE -o $OUT_FILE
+client.py -a 127.0.0.1 -c bart_pulseq -o $OUT_FILE -G images $IN_FILE

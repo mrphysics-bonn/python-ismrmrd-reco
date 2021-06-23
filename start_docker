@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -lt 1 ]; then
-    TAG="bart_server"
+    TAG="bart"
 else
     TAG="$1"
 fi

@@ -20,7 +20,7 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder:
 
 - Run `python client.py -c bart_pulseq ../example_data/pulseq_gre_dataset.h5`. The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script.
-- For convenience, the scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/pulseq_gre_dataset.h5`.
+- The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/pulseq_gre_dataset.h5`.
 - Required only for reconstruction of JEMRIS simulation data: Install the client in your conda environment by running `pip install .` from the "python-ismrmrd-server" folder. This lets you execute the client from anywhere.
 - Debug files (in npy format) and a log file are stored in the "debug" folder
 
@@ -40,7 +40,7 @@ Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecti
 - The reconstruction server has to be running.
 - The `client.py` has to be installed in the conda environment, where the JEMRIS simulation is executed.
 
-Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` (see [here](#sending-data-via-client)).
+Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described above.
 
 ## References
 

@@ -42,6 +42,11 @@ Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecti
 
 Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described above.
 
+## Extend & Modify existing reconstruction
+
+If the scripts `./start_docker` or `./start_docker_it` were used to start the docker container, the reconstruction codebase in the `python-ismrmrd-server` subdirectory is mounted in the active container. Changes to the reconstruction scripts will immediately applied in a new reconstruction started. If subscripts are altered, a restart of the reconstruction server might be necessary.
+New reconstruction scripts can be added in `server.py`, where a new configuration name should be assigned. The new reconstruction can be started sending data via `client.py` with the new configuration name by using the "-c" option (see above) 
+
 ## References
 
 [1] Layton, K. J. et. al. Pulseq: A rapid and hardware-independent pulse sequence prototyping framework, MRM, 2017;77(4):1544-1552, http://pulseq.github.io/

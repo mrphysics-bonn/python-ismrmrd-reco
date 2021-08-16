@@ -8,13 +8,13 @@ else
 fi
 
 if [ "$#" -lt 2 ]; then
-    TAG="bart_server"
+    TAG="bart"
 else
     TAG="$2"
 fi
 
 cd $PATH
 cd docker
+cd $TAG
 
-
-/usr/bin/docker build --no-cache -t $TAG .
+/usr/bin/docker build -t $TAG .

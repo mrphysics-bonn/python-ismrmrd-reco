@@ -10,6 +10,7 @@ For file size reasons the example data contains only one slice & noise data. Rec
 - Clone the repository and run `git submodule update --init`
 - Install docker and add user to docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker` after docker installation)
 - Run `./build_docker.sh` from the project folder. This builds the docker image on your system.
+- Alternatively the docker image can be installed from Dockerhub with `docker pull mavel101/bart-reco-server`.
 
 The container can be started by executing `./start_docker` or `./start_docker_it` from the project folder:
 - `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`)

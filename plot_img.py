@@ -22,6 +22,9 @@ for key in data['images']:
     imgs.append(data['images'][key]['data'][:])
     
 img_set = imgs[show_set][:]
+if np.iscomplexobj(img_set):
+    img_set = abs(img_set)
+
 slices = img_set.shape[0]
 if slices > 1:
     columns = int(np.sqrt(slices))

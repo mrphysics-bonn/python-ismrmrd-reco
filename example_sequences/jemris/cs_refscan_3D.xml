@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContainerSequence Info_Imp1="DZ" Info_Imp2="FTA" Info_Imp3="DKX" Info_Imp4="DKY" Info_Imp5="DKZ" Info_Imp6="FOVy" Info_Imp7="FOVz" Name="Ref">
+   <ConcatSequence LoopFlag="4" Name="PhsEnc2" Observe="FOVz=Ref.Imp7" Repetitions="floor(FOVz/2)">
+      <ConcatSequence LoopFlag="2" Name="PhsEnc1" Observe="FOVy=Ref.Imp6" Repetitions="floor(FOVy/5)">
+         <ATOMICSEQUENCE Aux1="0.1" Name="A1">
+            <SINCRFPULSE Apodization="0.5" Bandwidth="3" FlipAngle="8" InitialDelay="RUT+RFLead" InitialPhase="(C2*R+C1)*((C2*R+C1)+1)*50" Name="P1" Observe="RUT=P2.RampUpTime, RFLead=A1.Aux1,  C1=PhsEnc1.Counter, C2=PhsEnc2.Counter, R=PhsEnc1.Repetitions" Zeros="3"/>
+            <TRAPGRADPULSE Axis="GZ" FlatTopArea="2*D*BW*FTA" FlatTopTime="D" InitialDelay="RFLead" Name="P2" Observe="D=P1.Duration, BW=P1.Bandwidth, FTA=Ref.Imp2, RFLead=A1.Aux1" SlewRate="10"/>
+         </ATOMICSEQUENCE>
+         <ATOMICSEQUENCE Name="A2">
+            <TRAPGRADPULSE Area="-A/2" Axis="GX" Name="P3" Observe="A=P6.Area"/>
+            <TRAPGRADPULSE Area="(Step-Rep/2)*DKY" Axis="GY" Name="P4" Observe="Step=PhsEnc1.Counter, Rep=PhsEnc1.Repetitions, DKY=Ref.Imp4"/>
+            <TRAPGRADPULSE ADCFlag="1" Area="-0.5*A+(Step-Rep/2)*DKZ" Axis="GZ" Name="P5" Observe="A=P2.Area, D=P3.Duration, DKZ=Ref.Imp5, Step=PhsEnc2.Counter, Rep=PhsEnc2.Repetitions"/>
+         </ATOMICSEQUENCE>
+         <ATOMICSEQUENCE Name="A3">
+            <TRAPGRADPULSE ADCFlag="4" ADCs="40" Axis="GX" FlatTopArea="DKX*ADC" FlatTopTime="1.6" Name="P6" Observe="DKX=Ref.Imp3, ADC=P6.ADCs" PhaseLock="1"/>
+         </ATOMICSEQUENCE>
+         <ATOMICSEQUENCE Name="A4">
+            <TRAPGRADPULSE Area="-A/2" Axis="GX" Name="P7" Observe="A=P6.Area"/>
+            <TRAPGRADPULSE Area="-A" Axis="GY" Name="P8" Observe="A=P4.Area"/>
+            <TRAPGRADPULSE Area="-A+4*Pi" Axis="GZ" Name="P9" Observe="A=P5.Area"/>
+         </ATOMICSEQUENCE>
+      </ConcatSequence>
+   </ConcatSequence>
+</ContainerSequence>

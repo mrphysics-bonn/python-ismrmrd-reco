@@ -9,7 +9,7 @@ else
 fi
 
 if [ "$#" -lt 2 ]; then
-    OUT_FILE="debug/out.h5"
+    OUT_FILE="recon/out.h5"
     rm $OUT_FILE
 else
     OUT_FILE="$2"

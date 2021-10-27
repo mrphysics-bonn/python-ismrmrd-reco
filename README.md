@@ -3,7 +3,7 @@
 
 This repository contains a reconstruction pipeline for MRI data acquired with Pulseq [1]. The data is reconstructed using the BART MRI Toolbox [2].
 The example Pulseq sequences are located in the folder "pulseq_sequence". Data acquired with this example sequence is stored in the ISMRMRD format [3] in "example_data". The non-Cartesian example data provided in this repository was acquired with a spiral sequence and the reconstruction uses the GIRF predicted [4] spiral k-space trajectory.
-For file size reasons the example data contains only one slice & noise data. Reconstructed data will be located by default in "debug/out.h5".
+For file size reasons the example data contains only one slice & noise data. Reconstructed data will be located by default in "recon/out.h5".
 
 ## Set up docker image and start reconstruction server
 
@@ -24,9 +24,10 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 
 Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder:
 
-- Run `python client.py -c bart_pulseq -o debug/out.h5 ../example_data/pulseq_gre_dataset.h5`. The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. The option -o defines the image output path.
-- The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/pulseq_gre_dataset.h5 debug/out.h5`.
+- Run `python client.py -c bart_pulseq -o recon/out.h5 ../example_data/pulseq_gre_dataset.h5`. The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. The option -o defines the image output path.
+- The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/pulseq_gre_dataset.h5 recon/out.h5`.
 - Required only for reconstruction of JEMRIS simulation data: Install the client in your conda environment by running `pip install .` from the "python-ismrmrd-server" folder. This lets you execute the client from anywhere.
+- Images can be plotted with the `plot_img.py` script.
 - Debug files (in npy format) and a log file are stored in the "debug" folder
 
 ## Reconstruction of Pulseq data

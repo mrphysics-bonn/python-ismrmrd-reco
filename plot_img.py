@@ -7,12 +7,13 @@ Plot images from FIRE Reco
 import matplotlib.pyplot as plt
 import numpy as np
 import h5py
+import os
 
 show_set = 0 # number of image set in reco
 show_slice = 0 # number of slice shown in single view
 
-recodir = ""
-file = "signals_ismrmrd_recon.h5"
+recodir = os.getcwd() + "/recon/"
+file = "out.h5"
 data = h5py.File(recodir+file, 'r+')
 
 imgs = []

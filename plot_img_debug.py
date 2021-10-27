@@ -8,15 +8,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+debug_dir = os.getcwd() + "/debug/"
 
-os.chdir('debug/')
-
-raw = np.load('raw.npy')
-img = np.load('img.npy')
-sensmaps = np.load('sensmaps.npy')
-acs = np.load('acs.npy')
-acs_img = np.load('acs_img.npy')
-trj = np.load('trj.npy')
+raw = np.load(debug_dir+'raw.npy')
+img = np.load(debug_dir+'img.npy')
+sensmaps = np.load(debug_dir+'sensmaps.npy')
+acs = np.load(debug_dir+'acs.npy')
+acs_img = np.load(debug_dir+'acs_img.npy')
+trj = np.load(debug_dir+'trj.npy')
 
 
 if img.ndim>2:

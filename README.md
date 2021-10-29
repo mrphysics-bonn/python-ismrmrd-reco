@@ -1,11 +1,11 @@
-# Reconstruction pipeline for Pulseq acquistion data using the BART toolbox
+# Reconstruction pipeline for Pulseq/JEMRIS data with example Sequences and Datasets
 ## Example sequence and data
 
 This repository contains a reconstruction pipeline for MRI data acquired with Pulseq [1]. The data is reconstructed using the BART MRI Toolbox [2].
 The relevant files for reconstruction are placed in subfolders:  
 
 - "example_data": Contains raw datasets from a real MR scanner and from simulation with JEMRIS [3], that can be reconstructed with the pipeline.
-- "example_sequences": Contains the Pulseq sequence files, raw data was acquired with, as well as the source code for PyPulseq sequences (incl. ISMRMRD [4] protocol creation) and XML files for JEMRIS sequences
+- "example_sequences": Contains the Pulseq sequence files, raw data was acquired with, as well as the source code for Python/PyPulseq sequences (incl. ISMRMRD [4] protocol creation) and XML files for JEMRIS sequences
 - "dependency": Contains reconstruction dependencies, mainly the ISMRMRD [4] protocol files
 - "recon": Contains reconstructed images in hdf5 file. 
 

@@ -1,6 +1,6 @@
-## Example Sequences with PyPulseq and JEMRIS
+## Sequence and ISMRMRD protocol creation with Python/PyPulseq and JEMRIS
 
-This folder contains sequence files (.seq) for execution with Pulseq, as well as the JEMRIS (.xml) source files and the Python source code for PyPulseq based sequences. JEMRIS can be found at: https://github.com/JEMRIS/jemris/tree/ismrmrd-export.  
+This folder contains sequence files (.seq) for execution with Pulseq, as well as the JEMRIS (.xml) source files and the Python source code sequence and ISMRMRD protocol creation. JEMRIS can be found at: https://github.com/JEMRIS/jemris/tree/ismrmrd-export.  
 
 For the Python scripts write_cartesian.py (B0 mapping) & write_spiral.py the following dependencies are needed:
 - Custom version of PyPulseq:

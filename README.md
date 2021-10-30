@@ -44,7 +44,7 @@ Reconstruction can be started via the provided `client.py` from the "python-ismr
 For reconstruction of Pulseq data, a ISMRMRD protocol file has to be provided. This protocol file has to contain all necessary information for reconstruction such as counters, flags and other metadata. The protocol file has to be located in "dependency/pulseq_protocols". 
 
 If the sequence is executed on a Siemens scanner, the following steps are necessary:
-- The protocol file name has to be stored in the free text parameter "tFree" of the raw data protocol.
+- The protocol file name has to be stored in the free text parameter "tFree" of the raw data protocol. It will be converted to the first user defined string parameter in the ISMRMRD file.
 - The raw data has to be converted to the ISMRMRD format with the siemens_to_ismrmrd converter (https://github.com/ismrmrd/siemens_to_ismrmrd). After installation of the converter, `send_data_pulseq.sh` can handle Siemens raw data acquired with the Pulseq sequence.
 - The protocol name is transferred to the first user defined string parameter of the ISMRMRD file by the converter. The parameter maps used for conversion are stored in "python-ismrmrd-server/parameters_maps".
 - The necessary parameters for reconstruction are listed in the functions "insert_hdr" and "insert_acq" in "python-ismrmrd-server/pulseq_prot.py".

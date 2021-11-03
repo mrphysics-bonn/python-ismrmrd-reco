@@ -19,7 +19,7 @@ The non-Cartesian example data provided in this repository was acquired with a s
 - Alternatively the docker image can be installed from Dockerhub with `docker pull mavel101/bart-reco-server`.
 
 The default docker container contains only CPU based reconstructions. A Docker container with GPU support can be build with: `./build_docker.sh python-ismrmrd-server/ bart_cuda`
-Note that this container are of larger size and that the GPU versions need nvidia-docker installed (https://github.com/NVIDIA/nvidia-docker).
+Note that this container is of larger size and that the GPU version need nvidia-docker installed (https://github.com/NVIDIA/nvidia-docker).
 
 The container can be started by executing `./start_docker` or `./start_docker_it` from the project folder:
 - `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`)

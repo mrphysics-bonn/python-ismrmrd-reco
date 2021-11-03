@@ -26,11 +26,18 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 - `./start_docker_it` starts an interactive docker session in the bash shell. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed.
 - Use `./start_docker_gpu` or `./start_docker_it_gpu` for GPU support (nvidia-docker has to be installed)
 
-- Required only for reconstruction of JEMRIS simulation data: Install the client in your conda environment by running `pip install .` from the "python-ismrmrd-server" folder. This lets you execute the client from anywhere.
-
 ## Sending data via client
 
-Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. Example spiral reconstruction:
+Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It requires the following dependecies:
+- h5py: `pip install h5py`
+- ismrmrd-python:
+```console
+git clone https://github.com/ismrmrd/ismrmrd-python
+cd ismrmrd-python
+git checkout v1.9.3
+pip install .
+```
+ Example spiral reconstruction:
 
 - Run `python python-ismrmrd-server/client.py -c bart_pulseq -o recon/out.h5 example_data/pulseq_scanner/raw_spiralout_gre_fatsat.h5` . The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path.
 - The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/pulseq_scanner/raw_spiralout_gre_fatsat.h5 recon/out.h5`.
@@ -53,7 +60,7 @@ If the sequence is executed on a Siemens scanner, the following steps are necess
 
 Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecting the "-r" option in the simulation or by starting the BART recon in the GUI. However, the following prerequisites have to be met:
 - The reconstruction server has to be running.
-- The `client.py` has to be installed in the conda environment, where the JEMRIS simulation is executed.
+- The `client.py` (and its dependencies, see above) has to be installed in the conda environment, where the JEMRIS simulation is executed. Install the client by running `pip install .` from the "python-ismrmrd-server" folder. This lets you execute the client from anywhere.
 
 Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described above.
 

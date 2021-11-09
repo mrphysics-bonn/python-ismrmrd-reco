@@ -67,7 +67,10 @@ Reconstruction of already simulated data can also be started by running `send_da
 ### Extend & Modify existing reconstruction
 
 If the scripts `./start_docker` or `./start_docker_it` were used to start the docker container, the reconstruction codebase in the `python-ismrmrd-server` subdirectory is mounted in the active container. Changes to the reconstruction scripts will immediately applied in a new reconstruction started. If subscripts are altered, a restart of the reconstruction server might be necessary.
-New reconstruction scripts can be added in `server.py`, where a new configuration name should be assigned. The new reconstruction can be started sending data via `client.py` with the new configuration name by using the "-c" option (see above).
+Some important scripts are explained in more detail:  
+- `server.py`: New reconstruction scripts can be added here and a new configuration name should be assigned. The new reconstruction can be started sending data via `client.py` with the new configuration name by using the "-c" option (see above).
+- `pulseq_prot.py`: Contains the funtions for mirroring protocol information from the protocol file to the streamed raw data.
+- `bart_pulseq.py`: Launches a BART reconstruction pipeline for Pulseq data, depending on the trajectory type 
 
 More reconstruction scripts and Dockerfiles (e.g. for the PowerGrid reconstruction toolbox [6] for B0 correction support) can be found in the original repository: https://github.com/pehses/python-ismrmrd-server/tree/pulseq
 

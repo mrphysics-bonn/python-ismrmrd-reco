@@ -52,11 +52,12 @@ gx_flat_time = round(1e-6*dwelltime_us*samples, 5)
 
 # Gradients
 gx = make_trapezoid(channel='x', flat_area=Nx * delta_k, flat_time=gx_flat_time, system=system)
+gx_mid = make_trapezoid(channel='x', area=-gx.area, system=system)
 gx_pre = make_trapezoid(channel='x', area=-gx.area / 2, system=system)
 gx_pre.delay = calc_duration(gz_reph) - calc_duration(gx_pre)
 phase_areas = (np.arange(Ny) - Ny / 2) * delta_k
 
-# reduce slew rate of spoilers to avoid stimulation
+# spoilers
 gx_spoil = make_trapezoid(channel='x', area=2 * Nx * delta_k, system=system)
 gz_spoil = make_trapezoid(channel='z', area=4 / slice_res, system=system)
 
@@ -65,12 +66,11 @@ max_gy_pre = make_trapezoid(channel='y', area=max(abs(phase_areas)), system=syst
 gy_pre_dur = calc_duration(max_gy_pre)
 min_TE = np.ceil((gz.fall_time + gz.flat_time / 2 + calc_duration(gx_pre, max_gy_pre, gz_reph) + calc_duration(gx) / 2) / seq.grad_raster_time) * seq.grad_raster_time
 delay_TE1 = TE[0] - min_TE
-delay_TE2 = TE[1] - min_TE - 2*calc_duration(gx)
-
-# take minimum TR rounded up to .1 ms
-min_TR = calc_duration(gx_pre) + calc_duration(gz) + calc_duration(gx) + delay_TE1 + calc_duration(gx_spoil, gz_spoil)
-TR = ph.round_up_to_raster(min_TR, decimals=4)
-delay_TR = TR - min_TR
+delay_TE2 = TE[1] - TE[0] - calc_duration(gx) - calc_duration(gx_mid)
+if delay_TE1 < 0:
+    raise ValueError(f"TE 1 too small by {1e3*abs(delay_TE1)} ms. Increase readout bandwidth.")
+if delay_TE2 < 0:
+    raise ValueError(f"TE 2 too small by {1e3*abs(delay_TE2)} ms. Increase readout bandwidth.")
 
 # ADC with 2x oversampling
 adc = make_adc(num_samples=samples, dwell=1e-6*dwelltime_us, delay=gx.rise_time, system=system)
@@ -131,13 +131,11 @@ for s in range(slices):
         seq.add_block(gx_pre, gy_pre, gz_reph)
         seq.add_block(make_delay(delay_TE1))
         seq.add_block(gx)
-        gx.amplitude = -gx.amplitude
-        seq.add_block(gx)
+        seq.add_block(gx_mid)
         seq.add_block(make_delay(delay_TE2))
-        gx.amplitude = -gx.amplitude
         seq.add_block(gx)
         gy_pre.amplitude = -gy_pre.amplitude
-        seq.add_block(make_delay(delay_TR), gx_spoil, gy_pre, gz_spoil)
+        seq.add_block(gx_spoil, gy_pre, gz_spoil)
 
     # imaging scans
     for i in range(Ny):
@@ -151,13 +149,11 @@ for s in range(slices):
         seq.add_block(gx_pre, gy_pre, gz_reph)
         seq.add_block(make_delay(delay_TE1))
         seq.add_block(gx, adc)
-        gx.amplitude = -gx.amplitude
-        seq.add_block(gx)
+        seq.add_block(gx_mid)
         seq.add_block(make_delay(delay_TE2))
-        gx.amplitude = -gx.amplitude
         seq.add_block(gx, adc)
         gy_pre.amplitude = -gy_pre.amplitude
-        seq.add_block(make_delay(delay_TR), gx_spoil, gy_pre, gz_spoil)
+        seq.add_block(gx_spoil, gy_pre, gz_spoil)
 
         if prot is not None:
             for k in range(len(TE)):

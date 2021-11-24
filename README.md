@@ -28,16 +28,8 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 
 ## Sending data via client
 
-Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It requires the following dependecies:
-- h5py: `pip install h5py`
-- ismrmrd-python:
-```console
-git clone https://github.com/ismrmrd/ismrmrd-python
-cd ismrmrd-python
-git checkout v1.9.3
-pip install .
-```
- Example spiral reconstruction:
+Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It depends on ismrmrd-python and h5py, which will be automatically installed.
+Example spiral reconstruction:
 
 - Run `python python-ismrmrd-server/client.py -c bart_pulseq -o recon/out.h5 example_data/pulseq_scanner/raw_spiralout_gre_fatsat.h5` . The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path.
 - The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/pulseq_scanner/raw_spiralout_gre_fatsat.h5 recon/out.h5`.

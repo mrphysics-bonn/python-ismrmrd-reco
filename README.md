@@ -28,7 +28,7 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 
 ## Sending data via client
 
-Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It depends on ismrmrd-python and h5py, which will be automatically installed.
+Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It depends on ismrmrd-python and h5py, which will be automatically installed.  
 A conda environment with the client can be installed, by using the provided `ismrmrd_client.yaml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by runnign `conda activate ismrmrd_client`.
 To run an example spiral reconstruction:
 
@@ -53,9 +53,9 @@ If the sequence is executed on a Siemens scanner, the following steps are necess
 
 Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecting the "-r" option in the simulation or by starting the BART recon in the GUI. However, the following prerequisites have to be met:
 - The reconstruction server has to be running.
-- The `client.py` (and its dependencies, see above) has to be installed in the conda environment, where the JEMRIS simulation is executed. Install the client by running `pip install .` from the "python-ismrmrd-server" folder. This lets you execute the client from anywhere. It is recommended to use the provided `ismrmrd_client.yaml` to create a conda environment for the client.
+- The `client.py` (and its dependencies, see above) has to be installed in the conda environment, where the JEMRIS simulation is executed. Install the client by running `pip install .` from the "python-ismrmrd-server" folder. This lets you execute the client from anywhere. It is recommended to use the provided `ismrmrd_client.yml` to create a conda environment for the client.
 
-Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described above.
+Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described in "Sending data via client".
 
 ### Extend & Modify existing reconstruction
 

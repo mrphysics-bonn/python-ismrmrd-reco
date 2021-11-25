@@ -28,7 +28,7 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 
 ## Sending data via client
 
-Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It depends on ismrmrd-python and h5py, which will be automatically installed.  
+Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It depends on numpy, h5py and ismrmrd-python, which will be automatically installed.  
 A conda environment with the client can be installed, by using the provided `ismrmrd_client.yaml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by runnign `conda activate ismrmrd_client`.
 To run an example spiral reconstruction:
 

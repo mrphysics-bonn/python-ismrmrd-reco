@@ -87,7 +87,7 @@ if os.path.isfile(seq_name+'.h5'):
     os.remove(seq_name+'.h5')
 prot = ismrmrd.Dataset(seq_name+'.h5')
 hdr = ismrmrd.xsd.ismrmrdHeader()
-params_hdr = {"trajtype": "cartesian", "fov": fov*1e3, "res": res*1e3, "slices": slices, "slice_res": slice_res, "nintl": Ny, "contrast": len(TE)}
+params_hdr = {"trajtype": "cartesian", "fov": fov*1e3, "res": res*1e3, "slices": slices, "slice_res": slice_res, "nintl": Ny, "ncontrast": len(TE)}
 create_hdr(hdr, params_hdr)
 
 #%% Set up sequence

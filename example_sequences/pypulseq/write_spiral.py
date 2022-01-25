@@ -407,5 +407,17 @@ for s in range(slices):
     # avg
 # slices
 
-prot.close()
+# write sequence and add hash to protocol
 seq.write(seq_name+'.seq')
+seq_hash = seq.get_hash()
+signature = ismrmrd.xsd.userParameterStringType()
+signature.name = 'seq_signature'
+signature.value = seq_hash
+hdr.userParameters.userParameterString.append(signature)
+
+prot.write_xml_header(hdr.toXML('utf-8'))
+prot.close()
+
+# Optional: Add first chars of hash to sequence name
+os.rename(seq_name+'.seq', f'{seq_name}_{seq_hash[:5]}.seq')
+os.rename(seq_name+'.h5', f'{seq_name}_{seq_hash[:5]}.h5')

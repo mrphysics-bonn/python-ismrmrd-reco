@@ -1,4 +1,5 @@
 
+from inspect import signature
 import math
 import numpy as np
 import datetime
@@ -18,7 +19,7 @@ import pulseq_helper as ph
 from prot import create_hdr
 
 # Parameters
-seq_name = 'gre_b0mapping' # sequence/protocol filename
+seq_name = 'gre_b0mapping_hashed' # sequence/protocol filename
 TE = [2.04e-3, 4.08e-3] # [TE1, TE2] atm only 2 echo times supported
 fov = 220e-3
 res = 2e-3
@@ -88,7 +89,6 @@ prot = ismrmrd.Dataset(seq_name+'.h5')
 hdr = ismrmrd.xsd.ismrmrdHeader()
 params_hdr = {"trajtype": "cartesian", "fov": fov*1e3, "res": res*1e3, "slices": slices, "slice_res": slice_res, "nintl": Ny, "contrast": len(TE)}
 create_hdr(hdr, params_hdr)
-prot.write_xml_header(hdr.toXML('utf-8'))
 
 #%% Set up sequence
 
@@ -170,6 +170,18 @@ for s in range(slices):
     
 # use arrays to save b-values and directions in protocol
 prot.append_array("echo_times", np.asarray(TE))
+
+# write sequence and add hash to protocol
+seq.write(seq_name+'.seq')
+seq_hash = seq.get_hash()
+signature = ismrmrd.xsd.userParameterStringType()
+signature.name = 'seq_signature'
+signature.value = seq_hash
+hdr.userParameters.userParameterString.append(signature)
+
+prot.write_xml_header(hdr.toXML('utf-8'))
 prot.close()
 
-seq.write(seq_name+'.seq')
+# Optional: Add first chars of hash to sequence name
+os.rename(seq_name+'.seq', f'{seq_name}_{seq_hash[:5]}.seq')
+os.rename(seq_name+'.h5', f'{seq_name}_{seq_hash[:5]}.h5')

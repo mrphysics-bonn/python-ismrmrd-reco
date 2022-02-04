@@ -25,7 +25,7 @@ def gre_refscan(seq, prot=None, system=Opts(), params=None):
 
     # decrease slew rate a bit
     save_slew = system.max_slew
-    system.max_slew = 130 * system.gamma
+    system.max_slew = 100 * system.gamma
     if params is None:
         params = {"fov":210e-3, "res":3e-3, "flip_angle":12, "rf_dur":1e-3, "tbp": 2, "slices":1, "slice_res":2e-3, "dist_fac":0, "readout_bw": 600}
 
@@ -36,13 +36,17 @@ def gre_refscan(seq, prot=None, system=Opts(), params=None):
     # Calculate readout gradient and ADC parameters
     delta_k = 1 / params["fov"]
     Nx = Ny = int(params["fov"]/params["res"]+0.5)
-    samples = 2*Nx
+    samples = 2*Nx # 2x oversampling
     gx_flat_time_us = int(1e6/params["readout_bw"]) # readout_bw is in Hz/Px
-    dwelltime_us = gx_flat_time_us / samples
-    gx_flat_time = round(1e-6*dwelltime_us*samples, 5)
+    dwelltime = ph.trunc_to_raster(1e-6*gx_flat_time_us / samples, decimals=7)
+    gx_flat_time = round(dwelltime*samples, 5)
+    if (1e5*gx_flat_time %2 == 1):
+        gx_flat_time += 10e-6 # even flat time
+    diff_flat_adc = gx_flat_time - (dwelltime*samples)
 
     # Gradients
-    gx = make_trapezoid(channel='x', flat_area=Nx * delta_k, flat_time=gx_flat_time, system=system)
+    gx_flat_area = Nx * delta_k * (gx_flat_time / (dwelltime*samples)) # compensate for longer flat time than ADC
+    gx = make_trapezoid(channel='x', flat_area=gx_flat_area, flat_time=gx_flat_time, system=system)
     gx_pre = make_trapezoid(channel='x', area=-gx.area / 2, duration=1.4e-3, system=system)
     phase_areas = (np.arange(Ny) - Ny / 2) * delta_k
 
@@ -61,7 +65,7 @@ def gre_refscan(seq, prot=None, system=Opts(), params=None):
     delay_TR = TR - min_TR
 
     # ADC with 2x oversampling
-    adc = make_adc(num_samples=samples, dwell=1e-6*dwelltime_us, delay=gx.rise_time, system=system)
+    adc = make_adc(num_samples=samples, dwell=dwelltime, delay=gx.rise_time+diff_flat_adc/2, system=system)
     
     # RF spoiling
     rf_spoiling_inc = 117

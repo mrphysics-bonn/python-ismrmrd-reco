@@ -40,7 +40,7 @@ Some units get converted below, others have to stay in non-SI units as spiral ca
 """
 
 # General
-seq_name        = 'spiralout_gre_fatsat' # sequence/protocol filename
+seq_name        = 'spiralout_gre_fatsat_3T' # sequence/protocol filename
 
 # Sequence - Contrast and Geometry
 fov             = 220       # field of view [mm]
@@ -61,7 +61,7 @@ os_factor = 2               # oversampling factor (automatic 2x os from Siemens 
 
 # RF
 flip_angle      = 10        # flip angle of excitation pulse [°]
-rf_dur          = 2.5       # RF duration [ms]
+rf_dur          = 3       # RF duration [ms]
 tbp_exc         = 5         # time bandwidth product excitation pulse
 rf_spoiling     = False     # RF spoiling
 
@@ -69,10 +69,10 @@ fatsat          = True      # Fat saturation pulse
 fatsat_dur      = 2.1       # duration of fatsat pulse [ms] (increase at low TR to avoid SAR problems)
 
 # Gradients
-max_slew        = 160       # maximum slewrate [T/m/s] (system limit)
-spiral_slew     = 126       # maximum slew rate of spiral gradients - for pre Emph: set lower than max_slew
-max_grad        = 48        # maximum gradient amplitude [mT/m] (system limit) - used also for diffusion gradients
-max_grad_sp     = 35        # maximum gradient amplitude of spiral gradients - for pre_emph: set lower than max_grad
+max_slew        = 120       # maximum slewrate [T/m/s] (system limit)
+spiral_slew     = 100       # maximum slew rate of spiral gradients - for pre Emph: set lower than max_slew
+max_grad        = 40        # maximum gradient amplitude [mT/m] (system limit)
+max_grad_sp     = 30        # maximum gradient amplitude of spiral gradients - for pre_emph: set lower than max_grad
 
 Nintl           = 15         # spiral interleaves
 redfac          = 1         # reduction/acceleration factor

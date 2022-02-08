@@ -84,7 +84,8 @@ spiral_os       = 1         # spiral oversampling in center
 # Set System limits
 rf_dead_time = 100e-6 # lead time before rf can be applied
 rf_ringdown_time = 30e-6 # coil hold time (20e-6) + frequency reset time (10e-6)
-system = Opts(max_grad=max_grad, grad_unit='mT/m', max_slew=max_slew, slew_unit='T/m/s', rf_dead_time=rf_dead_time, rf_ringdown_time=rf_ringdown_time)
+adc_dead_time = 20e-6
+system = Opts(max_grad=max_grad, grad_unit='mT/m', max_slew=max_slew, slew_unit='T/m/s', rf_dead_time=rf_dead_time, rf_ringdown_time=rf_ringdown_time, adc_dead_time=adc_dead_time)
 
 # convert parameters to Pulseq units
 TR          *= 1e-3 # [s]
@@ -175,12 +176,9 @@ for k in range(Nintl):
     # unit to [Hz/m], make spiral gradients
     sp_x *= system.gamma
     sp_y *= system.gamma
-    if spiraltype==1:
-        spiral_delay = 2e-5 # delay the spirals to have some ADC samples before the start of the spiral
-    else:
-        spiral_delay = 0 # no spiral delay as sampling points should be mirrored in ROI
-    spirals[k]['spiral'][0] = make_arbitrary_grad(channel='x', waveform=sp_x, delay=spiral_delay, system=system)
-    spirals[k]['spiral'][1] = make_arbitrary_grad(channel='y', waveform=sp_y, delay=spiral_delay, system=system)
+
+    spirals[k]['spiral'][0] = make_arbitrary_grad(channel='x', waveform=sp_x, delay=system.adc_dead_time, system=system)
+    spirals[k]['spiral'][1] = make_arbitrary_grad(channel='y', waveform=sp_y, delay=system.adc_dead_time, system=system)
 
     if spiraltype==1:
         # calculate rephaser area
@@ -216,7 +214,7 @@ if dwelltime < min_dwelltime:
     dwelltime = min_dwelltime
 print("ADC dwelltime: {}".format(dwelltime))
 
-num_samples = round((readout_dur+spiral_delay)/dwelltime)
+num_samples = round(readout_dur/dwelltime)
 if num_samples%2==1:
     num_samples += 1 # even number of samples
 
@@ -248,7 +246,7 @@ else:
 if num_samples > 65535: # max of uint16 used by ISMRMRD
     raise ValueError("Too many samples for ISMRMRD format - lower the oversampling factor or take more interleaves")
 
-adc = make_adc(system=system, num_samples=num_samples, dwell=dwelltime)
+adc = make_adc(system=system, num_samples=num_samples, dwell=dwelltime, delay=system.adc_dead_time)
 adc_dur = num_samples * dwelltime
 adc_delay = ph.round_up_to_raster(adc_dur+200e-6, decimals=5) # add small delay after readout for ADC frequency reset event and to avoid stimulation by rephaser
 adc_delay = make_delay(d=adc_delay)
@@ -261,7 +259,7 @@ prot = ismrmrd.Dataset(seq_name+'.h5')
 hdr = ismrmrd.xsd.ismrmrdHeader()
 t_min = TE + dwelltime/2 # save trajectory starting point for B0-correction
 params_hdr = {"fov": fov, "res": res, "slices": slices, "slice_res": slice_res, "nintl":int(Nintl/redfac), "avg": averages,
-                "nsegments": num_segments, "dwelltime": dwelltime, "traj_delay": spiral_delay, "t_min": t_min, "trajtype": "spiral"}
+                "nsegments": num_segments, "dwelltime": dwelltime, "t_min": t_min, "trajtype": "spiral"}
 create_hdr(hdr, params_hdr)
 prot.write_xml_header(hdr.toXML('utf-8'))
 
@@ -280,8 +278,8 @@ if num_segments > 1:
 # Noise scans
 noise_samples = 256
 noise_dwelltime = 2e-6
-noise_adc = make_adc(system=system, num_samples=256, dwell=noise_dwelltime)
-noise_delay = make_delay(d=ph.round_up_to_raster(noise_adc.duration+1e-3,decimals=5)) # add some more time to the ADC delay to be safe
+noise_adc = make_adc(system=system, num_samples=256, dwell=noise_dwelltime, delay=system.adc_dead_time)
+noise_delay = make_delay(d=ph.round_up_to_raster(calc_duration(noise_adc)+1e-3,decimals=5)) # add some more time to the ADC delay to be safe
 for k in range(noisescans):
     seq.add_block(noise_adc, noise_delay)
     acq = ismrmrd.Acquisition()

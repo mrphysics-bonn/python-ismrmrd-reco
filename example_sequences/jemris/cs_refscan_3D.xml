@@ -11,6 +11,7 @@
             <TRAPGRADPULSE Area="(Step-Rep/2)*DKY" Axis="GY" Name="P4" Observe="Step=PhsEnc1.Counter, Rep=PhsEnc1.Repetitions, DKY=Ref.Imp4"/>
             <TRAPGRADPULSE ADCFlag="1" Area="-0.5*A+(Step-Rep/2)*DKZ" Axis="GZ" Name="P5" Observe="A=P2.Area, D=P3.Duration, DKZ=Ref.Imp5, Step=PhsEnc2.Counter, Rep=PhsEnc2.Repetitions"/>
          </ATOMICSEQUENCE>
+         <DELAYATOMICSEQUENCE ADCFlag="1" Delay="2.5" DelayType="C2C" Name="TE" StartSeq="A1" StopSeq="A3"/>
          <ATOMICSEQUENCE Name="A3">
             <TRAPGRADPULSE ADCFlag="4" ADCs="40" Axis="GX" FlatTopArea="DKX*ADC" FlatTopTime="1.6" Name="P6" Observe="DKX=Ref.Imp3, ADC=P6.ADCs" PhaseLock="1"/>
          </ATOMICSEQUENCE>
@@ -19,6 +20,7 @@
             <TRAPGRADPULSE Area="-A" Axis="GY" Name="P8" Observe="A=P4.Area"/>
             <TRAPGRADPULSE Area="-A+4*Pi" Axis="GZ" Name="P9" Observe="A=P5.Area"/>
          </ATOMICSEQUENCE>
+         <DELAYATOMICSEQUENCE ADCFlag="1" Delay="7" DelayType="B2E" Name="TR" StartSeq="A1" StopSeq="TR"/>
       </ConcatSequence>
    </ConcatSequence>
 </ContainerSequence>

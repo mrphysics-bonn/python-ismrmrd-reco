@@ -62,7 +62,7 @@ os_factor = 2               # oversampling factor (automatic 2x os from Siemens 
 # RF
 flip_angle      = 10        # flip angle of excitation pulse [°]
 rf_dur          = 3       # RF duration [ms]
-tbp_exc         = 5         # time bandwidth product excitation pulse
+tbp_exc         = 3         # time bandwidth product excitation pulse
 rf_spoiling     = False     # RF spoiling
 
 fatsat          = True      # Fat saturation pulse
@@ -71,7 +71,7 @@ fatsat_dur      = 2.1       # duration of fatsat pulse [ms] (increase at low TR 
 # Gradients
 max_slew        = 120       # maximum slewrate [T/m/s] (system limit)
 spiral_slew     = 100       # maximum slew rate of spiral gradients - for pre Emph: set lower than max_slew
-max_grad        = 40        # maximum gradient amplitude [mT/m] (system limit)
+max_grad        = 30        # maximum gradient amplitude [mT/m] (system limit)
 max_grad_sp     = 30        # maximum gradient amplitude of spiral gradients - for pre_emph: set lower than max_grad
 
 Nintl           = 15         # spiral interleaves
@@ -204,6 +204,7 @@ spoiler_area = 2*gz.flat_area - gz.area/2 # 2x moment under excitation pulse
 amp_spoil, ftop_spoil, ramp_spoil = ph.trap_from_area(spoiler_area, system, slewrate=100) # reduce slew rate to 100 T/m/s to avoid stimulation
 spoiler_z = make_trapezoid(channel='z',system=system, amplitude=amp_spoil, flat_time=ftop_spoil, rise_time=ramp_spoil, delay=100e-6)
 spoiler_dur = calc_duration(spoiler_z)
+reph_delay = spoiler_dur - np.max(reph_dur)
 
 #%% ADC
 
@@ -336,6 +337,8 @@ for s in range(slices):
         seq.add_block(te_delay)
         seq.add_block(spirals[0]['spiral'][0], spirals[0]['spiral'][1], adc_delay)
         if spiraltype==1:
+            spirals[0]['reph'][0].delay = reph_delay
+            spirals[0]['reph'][1].delay = reph_delay
             seq.add_block(spirals[0]['reph'][0], spirals[0]['reph'][1], spoiler_z)
             min_tr = exc_to_rew + TE + adc_delay.delay + max(reph_dur[0], spoiler_dur)
         else:
@@ -370,6 +373,8 @@ for s in range(slices):
             seq.add_block(te_delay)
             seq.add_block(spirals[n*redfac]['spiral'][0], spirals[n*redfac]['spiral'][1], adc, adc_delay)
             if spiraltype==1:
+                spirals[n*redfac]['reph'][0].delay = reph_delay
+                spirals[n*redfac]['reph'][1].delay = reph_delay
                 seq.add_block(spirals[n*redfac]['reph'][0], spirals[n*redfac]['reph'][1], spoiler_z)
                 min_tr = exc_to_rew + TE + adc_delay.delay + max(reph_dur[n*redfac], spoiler_dur)
             else:

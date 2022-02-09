@@ -36,12 +36,12 @@ Some units get converted below, others have to stay in non-SI units as spiral ca
 """
 
 # General
-seq_name        = 'spiralout_gre_fatsat_3T_noPreScan' # sequence/protocol filename
-B0              = 3         # field strength [T]
+seq_name        = 'spiralout_gre_fatsat_3T' # sequence/protocol filename
+B0              = 2.9         # field strength [T]
 
 # Sequence - Contrast and Geometry
 fov             = 220       # field of view [mm]
-TR              = 30       # repetition time [ms]
+TR              = 33       # repetition time [ms]
 TE              = 5        # echo time [ms]
 res             = 1       # in plane resolution [mm]                   
 slice_res       = 1       # slice thickness [mm]
@@ -49,7 +49,7 @@ slices          = 1         # number of slices
 dist_fac        = 0          # distance factor for slices [%]
 averages        = 1         # number of averages
 
-refscan         = False      # Cartesian reference scan for sensmaps
+refscan         = True      # Cartesian reference scan for sensmaps
 prepscans       = 64        # number of preparation/dummy scans before GRE
 noisescans      = 16        # number of noise scans
 
@@ -57,13 +57,13 @@ noisescans      = 16        # number of noise scans
 os_factor = 2               # oversampling factor (automatic 2x os from Siemens is not applied)
 
 # RF
-flip_angle      = 10        # flip angle of excitation pulse [°]
+flip_angle      = 20        # flip angle of excitation pulse [°]
 rf_dur          = 3       # RF duration [ms]
 tbp_exc         = 3         # time bandwidth product excitation pulse
 rf_spoiling     = False     # RF spoiling
 
 fatsat          = True      # Fat saturation pulse
-fatsat_dur      = 2.1       # duration of fatsat pulse [ms] (increase at low TR to avoid SAR problems)
+fatsat_tbp      = 2.1       # tbp of fatsat pulse
 
 # Gradients
 max_slew        = 120       # maximum slewrate [T/m/s] (system limit)
@@ -89,7 +89,6 @@ TR          *= 1e-3 # [s]
 TE          *= 1e-3 # [s]
 rf_dur      *= 1e-3 # [s]
 slice_res   *= 1e-3 # [m]
-fatsat_dur  *= 1e-3 # [s]
 
 if Nintl/redfac%1 != 0:
     raise ValueError('Number of interleaves is not multiple of reduction factor')
@@ -117,6 +116,7 @@ if fatsat:
     else:
         fatsat_bw = 300
     fatsat_fa = 110 # flip angle [°]
+    fatsat_dur = ph.round_up_to_raster(fatsat_tbp/fatsat_bw, decimals=5)
 
     rf_fatsat, fatsat_del = make_gauss_pulse(flip_angle=fatsat_fa*np.pi/180, duration=fatsat_dur, bandwidth=fatsat_bw, freq_offset=B0*ph.fw_shift, system=system, return_delay=True)
 
@@ -198,7 +198,7 @@ freq_max = ph.check_resonances([spiral_x,spiral_y])
 
 #%% Gradient Spoiler on slice axis
 
-spoiler_area = 2*gz.flat_area - gz.area/2 # 2x moment under excitation pulse
+spoiler_area = 1.5*gz.flat_area - gz.area/2 # 1.5x moment under excitation pulse
 amp_spoil, ftop_spoil, ramp_spoil = ph.trap_from_area(spoiler_area, system, slewrate=100) # reduce slew rate to 100 T/m/s to avoid stimulation
 spoiler_z = make_trapezoid(channel='z',system=system, amplitude=amp_spoil, flat_time=ftop_spoil, rise_time=ramp_spoil, delay=100e-6)
 spoiler_dur = calc_duration(spoiler_z)

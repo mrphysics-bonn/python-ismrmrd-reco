@@ -4,12 +4,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import h5py
 import ismrmrd
 import os
-import datetime
-from pathlib import Path # create directories
-import shutil # copy files
 
 from pypulseq.make_arbitrary_grad import make_arbitrary_grad
 from pypulseq.Sequence.sequence import Sequence
@@ -40,7 +36,7 @@ Some units get converted below, others have to stay in non-SI units as spiral ca
 """
 
 # General
-seq_name        = 'spiralout_gre_fatsat_3T' # sequence/protocol filename
+seq_name        = 'spiralout_gre_fatsat_3T_noPreScan' # sequence/protocol filename
 
 # Sequence - Contrast and Geometry
 fov             = 220       # field of view [mm]
@@ -52,7 +48,7 @@ slices          = 1         # number of slices
 dist_fac        = 0          # distance factor for slices [%]
 averages        = 1         # number of averages
 
-refscan         = True      # Cartesian reference scan for sensmaps
+refscan         = False      # Cartesian reference scan for sensmaps
 prepscans       = 64        # number of preparation/dummy scans before GRE
 noisescans      = 16        # number of noise scans
 

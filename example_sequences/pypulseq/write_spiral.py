@@ -37,6 +37,7 @@ Some units get converted below, others have to stay in non-SI units as spiral ca
 
 # General
 seq_name        = 'spiralout_gre_fatsat_3T_noPreScan' # sequence/protocol filename
+B0              = 3         # field strength [T]
 
 # Sequence - Contrast and Geometry
 fov             = 220       # field of view [mm]
@@ -111,10 +112,13 @@ rf_inc          = 0
 
 # Fat saturation
 if fatsat:
-    fatsat_bw = 1000 # bandwidth [Hz] (1000 Hz is approx. used by Siemens)
+    if B0 > 4:
+        fatsat_bw = 1000 # bandwidth of fatsat pulse [Hz]
+    else:
+        fatsat_bw = 300
     fatsat_fa = 110 # flip angle [°]
 
-    rf_fatsat, fatsat_del = make_gauss_pulse(flip_angle=fatsat_fa*np.pi/180, duration=fatsat_dur, bandwidth=fatsat_bw, freq_offset=ph.fw_shift, system=system, return_delay=True)
+    rf_fatsat, fatsat_del = make_gauss_pulse(flip_angle=fatsat_fa*np.pi/180, duration=fatsat_dur, bandwidth=fatsat_bw, freq_offset=B0*ph.fw_shift, system=system, return_delay=True)
 
 # echo time delay
 min_te = exc_to_rew + rew_dur

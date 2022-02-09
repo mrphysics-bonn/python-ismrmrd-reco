@@ -9,7 +9,7 @@ dt_grad  = 10e-6     # gradient raster [s]
 dt_skope = 1e-6      # skope raster [s]
 dt_quot  = int(dt_grad/dt_skope)
 
-fw_shift = -981 # fat water frequency shift [Hz] acc to Siemens diffusion seq (~ 7T*gamma*-3.3e-6) 
+fw_shift = -3.3e-6*42.57e6 # fat water frequency shift [Hz] acc to Siemens diffusion seq (~ 7T*gamma*-3.3e-6) 
 
 #############
 # FFTs

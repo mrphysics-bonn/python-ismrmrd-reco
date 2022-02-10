@@ -37,7 +37,7 @@ Some units get converted below, others have to stay in non-SI units as spiral ca
 
 # General
 seq_name        = 'spiralout_gre_fatsat_3T' # sequence/protocol filename
-B0              = 2.9         # field strength [T]
+B0              = 7         # field strength [T]
 
 # Sequence - Contrast and Geometry
 fov             = 220       # field of view [mm]
@@ -57,7 +57,7 @@ noisescans      = 16        # number of noise scans
 os_factor = 2               # oversampling factor (automatic 2x os from Siemens is not applied)
 
 # RF
-flip_angle      = 20        # flip angle of excitation pulse [°]
+flip_angle      = 10        # flip angle of excitation pulse [°]
 rf_dur          = 3       # RF duration [ms]
 tbp_exc         = 3         # time bandwidth product excitation pulse
 rf_spoiling     = False     # RF spoiling

@@ -121,7 +121,7 @@ if fatsat:
     rf_fatsat, fatsat_del = make_gauss_pulse(flip_angle=fatsat_fa*np.pi/180, duration=fatsat_dur, bandwidth=fatsat_bw, freq_offset=B0*ph.fw_shift, system=system, return_delay=True)
 
 # echo time delay
-min_te = exc_to_rew + rew_dur
+min_te = exc_to_rew + rew_dur + system.adc_dead_time
 if min_te > TE:
     raise ValueError('Minimum TE is {} ms.'.format(min_te*1e3))
 te_delay = make_delay(d = TE - min_te)

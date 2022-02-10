@@ -13,10 +13,12 @@ The non-Cartesian example data provided in this repository was acquired with a s
 
 ## Set up docker image and start reconstruction server
 
+- Install docker and add your user to the docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker` after docker installation)
+- A working docker image can be installed from Dockerhub with `docker pull mavel101/bart-reco-server`.
+
+If you want to build the docker image from the latest Dockerfile in this repository, the following steps are required:
 - Clone the repository and run `git submodule update --init`
-- Install docker and add user to docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker` after docker installation)
 - Run `./build_docker.sh` from the project folder. This builds the docker image on your system.
-- Alternatively the docker image can be installed from Dockerhub with `docker pull mavel101/bart-reco-server`.
 
 The default docker container contains only CPU based reconstructions. A Docker container with GPU support can be build with: `./build_docker.sh python-ismrmrd-server/ bart_cuda`
 Note that this container is of larger size and that the GPU version need nvidia-docker installed (https://github.com/NVIDIA/nvidia-docker).
@@ -28,8 +30,9 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 
 ## Sending data via client
 
-Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. It depends on numpy, h5py and ismrmrd-python, which will be automatically installed.  
-A conda environment with the client can be installed, by using the provided `ismrmrd_client.yaml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by runnign `conda activate ismrmrd_client`.
+Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. A conda environment with the client can be installed, by using the provided `ismrmrd_client.yaml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by running `conda activate ismrmrd_client`.
+Alternatively, the client can be installed in the current environment by running `pip install .` from the "python-ismrmrd-server" folder. The dependencies numpy, h5py and ismrmrd-python will automatically be installed. 
+
 To run an example spiral reconstruction:
 
 - Run `python python-ismrmrd-server/client.py -c bart_pulseq -o recon/out.h5 example_data/pulseq_scanner/raw_spiralout_gre_fatsat.h5` . The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path.

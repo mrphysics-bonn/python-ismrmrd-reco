@@ -36,17 +36,17 @@ Some units get converted below, others have to stay in non-SI units as spiral ca
 """
 
 # General
-seq_name        = 'spiralout_gre_fatsat_3T' # sequence/protocol filename
-B0              = 7         # field strength [T]
+seq_name        = 'spiralout_gre_fatsat_3T_TR200_9slc' # sequence/protocol filename
+B0              = 2.9         # field strength [T]
 
 # Sequence - Contrast and Geometry
 fov             = 220       # field of view [mm]
-TR              = 33       # repetition time [ms]
+TR              = 200       # repetition time [ms]
 TE              = 5        # echo time [ms]
 res             = 1       # in plane resolution [mm]                   
-slice_res       = 1       # slice thickness [mm]
-slices          = 1         # number of slices
-dist_fac        = 0          # distance factor for slices [%]
+slice_res       = 3       # slice thickness [mm]
+slices          = 9         # number of slices
+dist_fac        = 50          # distance factor for slices [%]
 averages        = 1         # number of averages
 
 refscan         = True      # Cartesian reference scan for sensmaps
@@ -57,7 +57,7 @@ noisescans      = 16        # number of noise scans
 os_factor = 2               # oversampling factor (automatic 2x os from Siemens is not applied)
 
 # RF
-flip_angle      = 10        # flip angle of excitation pulse [°]
+flip_angle      = 12        # flip angle of excitation pulse [°]
 rf_dur          = 3       # RF duration [ms]
 tbp_exc         = 3         # time bandwidth product excitation pulse
 rf_spoiling     = False     # RF spoiling

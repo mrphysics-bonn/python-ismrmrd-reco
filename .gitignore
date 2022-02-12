@@ -1,4 +1,5 @@
 *.npy
 *.vscode/
 .spyproject/
-*/__pycache__
+*__pycache__/
+debug/python-ismrmrd-server.log

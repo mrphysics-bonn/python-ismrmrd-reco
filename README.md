@@ -35,8 +35,8 @@ Alternatively, the client can be installed in the current environment by running
 
 To run an example spiral reconstruction:
 
-- Run `python python-ismrmrd-server/client.py -c bart_pulseq -o recon/out.h5 example_data/pulseq_scanner/raw_spiralout_gre_fatsat.h5` . The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path.
-- The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/pulseq_scanner/raw_spiralout_gre_fatsat.h5 recon/out.h5`.
+- Run `python python-ismrmrd-server/client.py -c bart_pulseq -o recon/out.h5 example_data/scanner/raw_spiralout_gre_fatsat_7T.h5` . The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path.
+- The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`.
 - By default, reconstructed data will be located in "recon/out.h5".
 - Reconstructed images can be plotted with the `plot_img.py` script.
 - Debug files (in npy format) and a log file are stored in the "debug" folder

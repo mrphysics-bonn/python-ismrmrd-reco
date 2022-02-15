@@ -68,7 +68,7 @@ Some important scripts are explained in more detail:
 - `pulseq_prot.py`: Contains the funtions for mirroring protocol information from the protocol file to the streamed raw data.
 - `bart_pulseq.py`: Launches a BART reconstruction pipeline for Pulseq data, depending on the trajectory type 
 
-More reconstruction scripts and Dockerfiles (e.g. for the PowerGrid reconstruction toolbox [6] for B0 correction support) can be found in the original repository: https://github.com/pehses/python-ismrmrd-server/tree/pulseq
+More reconstruction scripts and Dockerfiles (e.g. for the PowerGrid reconstruction toolbox [6] for static offresonance correction support) can be found in the following repository: https://github.com/pehses/python-ismrmrd-server/tree/pulseq
 
 ## References
 
@@ -83,4 +83,4 @@ More reconstruction scripts and Dockerfiles (e.g. for the PowerGrid reconstructi
 [5] Vannesjo, S. J. et al. Gradient System Characterization by Impulse Response Measurements with a Dynamic Field Camera. MRM
 2013;69:583-593
 
-[6] Cerjanic, A. et al. PowerGrid: A open source library for accelerated iterative magnetic resonance image reconstruction, Proc. Intl. Soc. Mag. Res. Med., 2016
+[6] Cerjanic, A. et al. PowerGrid: A open source library for accelerated iterative magnetic resonance image reconstruction, Proc. Intl. Soc. Mag. Res. Med., 2016, http://mrfil.github.io/PowerGrid/

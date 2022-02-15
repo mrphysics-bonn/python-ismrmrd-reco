@@ -68,7 +68,7 @@ Some important scripts are explained in more detail:
 - `pulseq_prot.py`: Contains the funtions for mirroring protocol information from the protocol file to the streamed raw data.
 - `bart_pulseq.py`: Launches a BART reconstruction pipeline for Pulseq data, depending on the trajectory type 
 
-More reconstruction scripts and Dockerfiles (e.g. for the PowerGrid reconstruction toolbox [6] for static offresonance correction support) can be found in the following repository: https://github.com/pehses/python-ismrmrd-server/tree/pulseq
+More reconstruction scripts and Dockerfiles including the PowerGrid reconstruction toolbox [6] for static offresonance correction support can be found in the "pulseq" branch of the sub-repository `python-ismrmrd-server` (https://github.com/pehses/python-ismrmrd-server/tree/pulseq).
 
 ## References
 

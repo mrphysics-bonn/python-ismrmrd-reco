@@ -3,3 +3,4 @@
 .spyproject/
 *__pycache__/
 debug/python-ismrmrd-server.log
+recon/out.h5

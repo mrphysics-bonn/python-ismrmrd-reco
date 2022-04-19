@@ -57,9 +57,6 @@ def create_hdr(hdr, params):
     hdr.userParameters = ismrmrd.xsd.userParametersType()
     hdr.userParameters.userParameterDouble.append(dtime)
     hdr.userParameters.userParameterDouble.append(tdel)
-    hdr.userParameters.userParameterDouble.append(nseg)
-    hdr.userParameters.userParameterDouble.append(tmin)
-    hdr.userParameters.userParameterDouble.append(os_region)
 
     # encoding
     encoding = ismrmrd.xsd.encodingType()

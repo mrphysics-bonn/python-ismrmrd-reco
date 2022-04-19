@@ -1,12 +1,35 @@
 # Reconstruction pipeline for Pulseq/JEMRIS data with example Sequences and Datasets
-## Example sequence and data
 
 This repository contains a reconstruction pipeline for MRI data acquired with Pulseq [1]. The data is reconstructed using the BART MRI Toolbox [2].
+
+## Quick start guide - from sequence to image
+
+In this quick start, Cartesian and spiral sequences are created with PyPulseq. The raw data collected with this sequence, is reconstructed and images are displayed. A Python and a Docker installation are required. Information on how to install Docker can be found below.
+
+Creating a sequence:
+1. Install the necessary dependencies by running `conda env create -f seqdev.yml`, which will create a new Python environment. Activate the environment with `conda activate seqdev`.
+2. Run the Python scripts "write_spiral.py" or "write_cartesian.py" in the directory "example_sequences/pypulseq". At the top of both scripts, protocol parameters and the sequence filename can be changed. 
+3. A Pulseq file (.seq) is created in the same directory and an ISMRMRD metadata file (.h5) is created in the folder "dependency/metadata". This metadata file is important for the reconstruction, as raw data obtained from Pulseq sequences does not contain any information, on how the kspace was acquired.
+
+Running a reconstruction:
+1. Pull the reconstruction container from Dockerhub: `docker pull mavel101/bart-reco-server`.
+2. Start the container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background.
+3. Example ISMRMRD raw data files are located in "example_data". Raw data conversion for Siemens data to ISMRMRD [3] is described below.
+4. Run a reconstruction by sending the data to the server.  
+Example Pulseq reconstruction: `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`. 
+Example JEMRIS reconstruction: `./send_data_jemris.sh example_data/simu/signals_spiralout_clean_slc30.h5 recon/out.h5`.  
+5. The metadata is automatically merged to the raw data during the reconstruction process. Logging information and debug files can be found in the "debug" folder.
+6. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in ISMRMRD image format. Image files will not be overwritten, but new images will be appended to existing files.
+
+JEMRIS example sequences can be found in "example_sequences/jemris". Installation instructions and documentation regarding JEMRIS can be found on the projects website: https://github.com/JEMRIS/jemris/
+
+## Example sequences and data
+
 The relevant files for reconstruction are placed in subfolders:  
 
 - "example_data": Contains raw datasets from a real MR scanner and from simulation with JEMRIS [3], that can be reconstructed with the pipeline.
-- "example_sequences": Contains the Pulseq sequence files, raw data was acquired with, as well as the source code for Python/PyPulseq sequences (incl. ISMRMRD [4] protocol creation) and XML files for JEMRIS sequences
-- "dependency": Contains reconstruction dependencies, mainly the ISMRMRD [4] protocol files
+- "example_sequences": Contains the Pulseq sequence files, raw data was acquired with, as well as the source code for Python/PyPulseq sequences (incl. ISMRMRD [4] metadata creation) and XML files for JEMRIS sequences
+- "dependency": Contains reconstruction dependencies, mainly the ISMRMRD [4] metadata files
 - "recon": Contains reconstructed images in hdf5 file. 
 
 The non-Cartesian example data provided in this repository was acquired with a spiral sequence and the reconstruction uses the GIRF predicted [5] spiral k-space trajectory.
@@ -35,22 +58,23 @@ Alternatively, the client can be installed in the current environment by running
 
 To run an example spiral reconstruction:
 
-- Run `python python-ismrmrd-server/client.py -c bart_pulseq -o recon/out.h5 example_data/scanner/raw_spiralout_gre_fatsat_7T.h5` . The option "-c" submits the configuration for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path.
-- The scripts `send_data_pulseq.sh` and `send_data_jemris.sh` can be used for sending data. For example, the above command reduces to `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`.
+- The scripts `send_data_pulseq.sh` (data from MR scanner) and `send_data_jemris.sh` (data from JEMRIS simulations) can be used as a shortcut for sending the data. For example, the command `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5` reconstructs a spiral dataset.
 - By default, reconstructed data will be located in "recon/out.h5".
 - Reconstructed images can be plotted with the `plot_img.py` script.
 - Debug files (in npy format) and a log file are stored in the "debug" folder
+- The above command extends to `python python-ismrmrd-server/client.py -c bart_pulseq -g images -o recon/out.h5 example_data/scanner/raw_spiralout_gre_fatsat_7T.h5`. The option "-c" selects the configuration name for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path and option -G defines the group name of the output images in the hdf5 file.
+- The script plot_img.py can be used to view reconstructed images via the Python library matplotlib
 
 ## Further information on acquisition and reconstruction
 ### Acquisition and reconstruction of Pulseq data
 
-For reconstruction of Pulseq data, a ISMRMRD protocol file has to be provided. This protocol file has to contain all necessary information for reconstruction such as counters, flags and other metadata. The protocol file has to be located in "dependency/pulseq_protocols". 
+For reconstruction of Pulseq data, a ISMRMRD metadata file has to be provided. This metadata file has to contain all necessary information for reconstruction such as counters, flags and other metadata. The metadata file has to be located in "dependency/metadata". 
 
 If the sequence is executed on a Siemens scanner, the following steps are necessary:
-- The protocol file name has to be stored in the free text parameter "tFree" of the raw data protocol. It will be converted to the first user defined string parameter in the ISMRMRD file.
+- The metadata file name has to be stored in the free text parameter "tFree" of the raw data file. It will be converted to the first user defined string parameter in the ISMRMRD file.
 - The raw data has to be converted to the ISMRMRD format with the siemens_to_ismrmrd converter (https://github.com/ismrmrd/siemens_to_ismrmrd). After installation of the converter, `send_data_pulseq.sh` can handle Siemens raw data acquired with the Pulseq sequence.
-- The protocol name is transferred to the first user defined string parameter of the ISMRMRD file by the converter. The parameter maps used for conversion are stored in "python-ismrmrd-server/parameters_maps".
-- The necessary parameters for reconstruction are listed in the functions "insert_hdr" and "insert_acq" in "python-ismrmrd-server/pulseq_prot.py".
+- The metadata filename is transferred to the first user defined string parameter of the ISMRMRD file by the converter. The parameter maps used for conversion are stored in "python-ismrmrd-server/parameters_maps".
+- The necessary parameters for reconstruction are listed in the functions "insert_hdr" and "insert_acq" in "python-ismrmrd-server/pulseq_helper.py".
 
 ### Reconstruction of JEMRIS simulation data
 
@@ -65,7 +89,7 @@ Reconstruction of already simulated data can also be started by running `send_da
 If the scripts `./start_docker` or `./start_docker_it` were used to start the docker container, the reconstruction codebase in the `python-ismrmrd-server` subdirectory is mounted in the active container. Changes to the reconstruction scripts will immediately applied in a new reconstruction started. If subscripts are altered, a restart of the reconstruction server might be necessary.
 Some important scripts are explained in more detail:  
 - `server.py`: New reconstruction scripts can be added here and a new configuration name should be assigned. The new reconstruction can be started sending data via `client.py` with the new configuration name by using the "-c" option (see above).
-- `pulseq_prot.py`: Contains the funtions for mirroring protocol information from the protocol file to the streamed raw data.
+- `pulseq_helper.py`: Contains the funtions for mirroring metadata information from the metadata file to the streamed raw data.
 - `bart_pulseq.py`: Launches a BART reconstruction pipeline for Pulseq data, depending on the trajectory type 
 
 More reconstruction scripts and Dockerfiles including the PowerGrid reconstruction toolbox [6] for static offresonance correction support can be found in the "pulseq" branch of the sub-repository `python-ismrmrd-server` (https://github.com/pehses/python-ismrmrd-server/tree/pulseq).

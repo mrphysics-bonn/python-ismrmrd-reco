@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Plot images from FIRE Reco
+Plot images from reco
 """
 
 import matplotlib.pyplot as plt

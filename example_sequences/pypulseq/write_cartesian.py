@@ -1,8 +1,11 @@
+# Cartesian 2-echo GRE Pulseq sequence
 
+# This code only works with a custom PyPulseq version that can be obtained from https://github.com/mavel101/pypulseq/tree/dev_mv
+
+#%%
 from inspect import signature
 import math
 import numpy as np
-import datetime
 import os
 
 import ismrmrd
@@ -16,10 +19,10 @@ from pypulseq.make_trap_pulse import make_trapezoid
 from pypulseq.opts import Opts
 
 import pulseq_helper as ph
-from prot import create_hdr
+from hdr import create_hdr
 
 # Parameters
-seq_name = 'gre_b0mapping_hashed' # sequence/protocol filename
+seq_name = 'gre_b0mapping' # sequence filename
 TE = [2.04e-3, 4.08e-3] # [TE1, TE2] atm only 2 echo times supported
 fov = 220e-3
 res = 2e-3
@@ -81,18 +84,20 @@ rf_spoiling_inc = 117
 rf_phase = 0
 rf_inc = 0
 
-#%% Set up protocol
+#%% Set up metadata
 
-if os.path.isfile(seq_name+'.h5'):
-    os.remove(seq_name+'.h5')
-prot = ismrmrd.Dataset(seq_name+'.h5')
+meta_folder = '../../dependency/metadata/'
+meta_filename = meta_folder+seq_name+'.h5'
+if os.path.isfile(meta_filename):
+    os.remove(meta_filename)
+meta_file = ismrmrd.Dataset(meta_filename)
 hdr = ismrmrd.xsd.ismrmrdHeader()
 params_hdr = {"trajtype": "cartesian", "fov": fov*1e3, "res": res*1e3, "slices": slices, "slice_res": slice_res, "nintl": Ny, "ncontrast": len(TE)}
 create_hdr(hdr, params_hdr)
 
 #%% Set up sequence
 
-seq.set_definition("Name", seq_name) # protocol name is saved in Siemens header for FIRE reco
+seq.set_definition("Name", seq_name) # metadata file name is saved in Siemens header for reco
 seq.set_definition("FOV", [fov, fov, slice_res])
 seq.set_definition("Slice_Thickness", "%f" %(slice_res*slices))
 
@@ -105,7 +110,7 @@ for k in range(noisescans):
     seq.add_block(noise_adc, noise_delay)
     acq = ismrmrd.Acquisition()
     acq.setFlag(ismrmrd.ACQ_IS_NOISE_MEASUREMENT)
-    prot.append_acquisition(acq)
+    meta_file.append_acquisition(acq)
 
 if slices%2 == 1:
     slc = 0
@@ -155,7 +160,7 @@ for s in range(slices):
         gy_pre.amplitude = -gy_pre.amplitude
         seq.add_block(gx_spoil, gy_pre, gz_spoil)
 
-        if prot is not None:
+        if meta_file is not None:
             for k in range(len(TE)):
                 acq = ismrmrd.Acquisition()
                 acq.idx.kspace_encode_step_1 = i
@@ -164,14 +169,14 @@ for s in range(slices):
                 acq.idx.contrast = k
                 if i == Ny-1:
                     acq.setFlag(ismrmrd.ACQ_LAST_IN_SLICE)
-                prot.append_acquisition(acq)
+                meta_file.append_acquisition(acq)
             
     slc += 2 # acquire every 2nd slice, afterwards fill slices inbetween
     
-# use arrays to save b-values and directions in protocol
-prot.append_array("echo_times", np.asarray(TE))
+# use arrays to save b-values and directions in metadata
+meta_file.append_array("echo_times", np.asarray(TE))
 
-# write sequence and add hash to protocol
+# write sequence and add hash to metadata
 seq.write(seq_name+'.seq')
 seq_hash = seq.get_hash()
 signature = ismrmrd.xsd.userParameterStringType()
@@ -179,9 +184,9 @@ signature.name = 'seq_signature'
 signature.value = seq_hash
 hdr.userParameters.userParameterString.append(signature)
 
-prot.write_xml_header(hdr.toXML('utf-8'))
-prot.close()
+meta_file.write_xml_header(hdr.toXML('utf-8'))
+meta_file.close()
 
-# Optional: Add first chars of hash to sequence name
+# Add first chars of hash to sequence name
 os.rename(seq_name+'.seq', f'{seq_name}_{seq_hash[:5]}.seq')
-os.rename(seq_name+'.h5', f'{seq_name}_{seq_hash[:5]}.h5')
+os.rename(meta_filename, meta_folder+f'{seq_name}_{seq_hash[:5]}.h5')

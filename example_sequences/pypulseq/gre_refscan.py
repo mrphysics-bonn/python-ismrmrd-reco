@@ -21,7 +21,7 @@ from pypulseq.opts import Opts
 
 import pulseq_helper as ph
 
-def gre_refscan(seq, prot=None, system=Opts(), params=None):
+def gre_refscan(seq, meta_file=None, system=Opts(), params=None):
 
     # decrease slew rate a bit
     save_slew = system.max_slew
@@ -117,7 +117,7 @@ def gre_refscan(seq, prot=None, system=Opts(), params=None):
             gy_pre.amplitude = -gy_pre.amplitude
             seq.add_block(make_delay(delay_TR), gx_spoil, gy_pre, gz_spoil)
 
-            if prot is not None:
+            if meta_file is not None:
                 acq = ismrmrd.Acquisition()
                 acq.idx.kspace_encode_step_1 = i
                 acq.idx.kspace_encode_step_2 = 0 # only 2D atm
@@ -126,7 +126,7 @@ def gre_refscan(seq, prot=None, system=Opts(), params=None):
                 acq.setFlag(ismrmrd.ACQ_IS_PARALLEL_CALIBRATION)
                 if i == Ny-1:
                     acq.setFlag(ismrmrd.ACQ_LAST_IN_SLICE)
-                prot.append_acquisition(acq)
+                meta_file.append_acquisition(acq)
                 
         slc += 2 # acquire every 2nd slice, afterwards fill slices inbetween
 

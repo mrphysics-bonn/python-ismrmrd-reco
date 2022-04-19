@@ -1,9 +1,10 @@
 # Spiral Pulseq Sequence
 
+# This code only works with a custom PyPulseq version that can be obtained from https://github.com/mavel101/pypulseq/tree/dev_mv
+
 #%%
 
 import numpy as np
-import matplotlib.pyplot as plt
 import ismrmrd
 import os
 
@@ -14,13 +15,12 @@ from pypulseq.make_sinc_pulse import make_sinc_pulse
 from pypulseq.make_gauss_pulse import make_gauss_pulse
 from pypulseq.make_trap_pulse import make_trapezoid
 from pypulseq.make_delay import make_delay
-from pypulseq.make_digital_output_pulse import make_digital_output_pulse
 from pypulseq.opts import Opts
 from pypulseq.calc_duration import calc_duration
 
 import spiraltraj
 import pulseq_helper as ph
-from prot import create_hdr
+from hdr import create_hdr
 from gre_refscan import gre_refscan
 
 #%% Parameters 
@@ -36,7 +36,7 @@ Some units get converted below, others have to stay in non-SI units as spiral ca
 """
 
 # General
-seq_name        = 'spiralout_gre_fatsat_3T_TR200_9slc' # sequence/protocol filename
+seq_name        = 'spiralout_gre_fatsat_3T' # sequence filename
 B0              = 2.9         # field strength [T]
 
 # Sequence - Contrast and Geometry
@@ -251,25 +251,28 @@ adc_dur = num_samples * dwelltime
 adc_delay = ph.round_up_to_raster(adc_dur+200e-6, decimals=5) # add small delay after readout for ADC frequency reset event and to avoid stimulation by rephaser
 adc_delay = make_delay(d=adc_delay)
 
-#%% Set up protocol for FIRE reco and write header
+#%% Set up metadata file for reco and write header
 
-if os.path.isfile(seq_name+'.h5'):
-    os.remove(seq_name+'.h5')
-prot = ismrmrd.Dataset(seq_name+'.h5')
+meta_folder = '../../dependency/metadata/'
+meta_filename = meta_folder+seq_name+'.h5'
+if os.path.isfile(meta_filename):
+    os.remove(meta_filename)
+meta_file = ismrmrd.Dataset(meta_filename)
+
 hdr = ismrmrd.xsd.ismrmrdHeader()
 t_min = TE + dwelltime/2 # save trajectory starting point for B0-correction
 params_hdr = {"fov": fov, "res": res, "slices": slices, "slice_res": slice_res, "nintl":int(Nintl/redfac), "avg": averages,
                 "nsegments": num_segments, "dwelltime": dwelltime, "t_min": t_min, "trajtype": "spiral"}
 create_hdr(hdr, params_hdr)
-prot.write_xml_header(hdr.toXML('utf-8'))
+meta_file.write_xml_header(hdr.toXML('utf-8'))
 
-#%% Add sequence blocks to sequence & write acquisitions to protocol
+#%% Add sequence blocks to sequence & write acquisitions to metadata
 
 # Set up the sequence
 seq = Sequence()
 
 # Definitions section in seq file
-seq.set_definition("Name", seq_name) # protocol name is saved in Siemens header for FIRE reco
+seq.set_definition("Name", seq_name) # metadata file name is saved in Siemens header for FIRE reco
 seq.set_definition("FOV", [1e-3*fov, 1e-3*fov, slice_res]) # for FOV positioning
 seq.set_definition("Slice_Thickness", "%f" % (slice_res*(1+dist_fac*1e-2)*(slices-1)+slice_res)) # we misuse this to show the total covered head area in the GUI
 if num_segments > 1:
@@ -284,7 +287,7 @@ for k in range(noisescans):
     seq.add_block(noise_adc, noise_delay)
     acq = ismrmrd.Acquisition()
     acq.setFlag(ismrmrd.ACQ_IS_NOISE_MEASUREMENT)
-    prot.append_acquisition(acq)
+    meta_file.append_acquisition(acq)
 
 # Perform cartesian reference scan: if selected / for accelerated spirals / for long readouts
 if refscan == False:
@@ -298,7 +301,7 @@ if refscan:
     bw_refscan = 800
     params_ref = {"fov":fov*1e-3, "res":res_refscan, "slices":slices, "slice_res":slice_res, "dist_fac": dist_fac, "flip_angle":flip_refscan,
      "rf_dur":rf_dur, "tbp": tbp_exc, "readout_bw": bw_refscan}
-    gre_refscan(seq, prot=prot, system=system, params=params_ref)
+    gre_refscan(seq, meta_file=meta_file, system=system, params=params_ref)
 
 
 """ GRE
@@ -387,7 +390,7 @@ for s in range(slices):
             tr_delay = make_delay(d=TR-min_tr)
             seq.add_block(tr_delay)
 
-            # add protocol information
+            # add metadata information
             for seg in range(num_segments):
                 acq = ismrmrd.Acquisition()
                 if (n == int(Nintl/redfac) - 1) and (seg == num_segments - 1):
@@ -402,7 +405,7 @@ for s in range(slices):
                     # we misuse the trajectory field for the gradient array - channels are hardcoded
                     acq.resize(trajectory_dimensions = save_sp.shape[1], number_of_samples=save_sp.shape[2], active_channels=32)
                     acq.traj[:] = np.swapaxes(save_sp[n*redfac],0,1) # [samples, dims]
-                prot.append_acquisition(acq)
+                meta_file.append_acquisition(acq)
     
     slc += 2 # acquire every 2nd slice, afterwards fill slices inbetween
 
@@ -410,7 +413,7 @@ for s in range(slices):
     # avg
 # slices
 
-# write sequence and add hash to protocol
+# write sequence and add hash to metadata
 seq.write(seq_name+'.seq')
 seq_hash = seq.get_hash()
 signature = ismrmrd.xsd.userParameterStringType()
@@ -418,9 +421,9 @@ signature.name = 'seq_signature'
 signature.value = seq_hash
 hdr.userParameters.userParameterString.append(signature)
 
-prot.write_xml_header(hdr.toXML('utf-8'))
-prot.close()
+meta_file.write_xml_header(hdr.toXML('utf-8'))
+meta_file.close()
 
-# Optional: Add first chars of hash to sequence name
+# Add first chars of hash to sequence name
 os.rename(seq_name+'.seq', f'{seq_name}_{seq_hash[:5]}.seq')
-os.rename(seq_name+'.h5', f'{seq_name}_{seq_hash[:5]}.h5')
+os.rename(meta_filename, meta_folder+f'{seq_name}_{seq_hash[:5]}.h5')

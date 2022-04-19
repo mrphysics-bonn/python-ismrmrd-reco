@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Parameters FOVx="210" FOVy="210" FOVz="160" GradMaxAmpl="9" GradSlewRate="35" Name="P" Nx="210" Ny="210" Nz="160" TE="25" TR="30">
+   <ConcatSequence Name="Seq">
+      <CONTAINER Filename="cs_refscan_3D.xml" Imp1="DZ" Imp2="Pi/FOVz" Imp3="DKX" Imp4="DKY" Imp5="DKZ" Imp6="FOVy" Imp7="FOVz" Name="Refscan" Observe="DZ=P.Dz, FOVz=P.FOVz, DKX=P.DKx, DKY=P.DKy, DKZ=P.DKz, FOVy=P.FOVy"/>
+      <DELAYATOMICSEQUENCE Delay="2000" DelayType="B2E" Name="D1"/>
+      <ConcatSequence LoopFlag="4" Name="PhsEnc2" Observe="NZ=P.Nz" Repetitions="NZ">
+         <ConcatSequence Aux1="4" Aux2="1" LoopFlag="2" Name="PhsEnc1" Observe="NY=P.Ny, R=PhsEnc1.Aux1" Repetitions="NY/R">
+            <ATOMICSEQUENCE Aux1="0.1" Name="A1">
+               <HARDRFPULSE ADCFlag="1" Duration="1.02" FlipAngle="10" InitialDelay="RFLead" Name="P1" Observe="RFLead=A1.Aux1" Symmetry="0.5"/>
+               <EMPTYPULSE ADCFlag="1" Axis="NONE" Duration="D+2*RFLead" Name="P2" Observe="D=P1.Duration, RFLead=A1.Aux1"/>
+            </ATOMICSEQUENCE>
+            <DELAYATOMICSEQUENCE Delay="TE" DelayType="C2C" Name="TE" Observe="TE=P.TE" StartSeq="A1" StopSeq="A3"/>
+            <ATOMICSEQUENCE Name="A2">
+               <TRAPGRADPULSE Area="-A/2" Axis="GX" Name="P3" Observe="A=P6.Area"/>
+               <TRAPGRADPULSE Area="-KMY+DKY*(PhsEnc1*R+mod(PhsEnc2,R)*Caipi)" Axis="GY" Name="P4" Observe="KMY=P.KMAXy, PhsEnc1=PhsEnc1.Counter, DKY=P.DKy, PhsEnc2=PhsEnc2.Counter, R=PhsEnc1.Aux1, Caipi=PhsEnc1.Aux2"/>
+               <TRAPGRADPULSE Area="-KMZ+PhsEnc*DKZ" Axis="GZ" Name="P5" Observe="KMZ=P.KMAXz, PhsEnc=PhsEnc2.Counter, DKZ=P.DKz"/>
+            </ATOMICSEQUENCE>
+            <ATOMICSEQUENCE Name="A3">
+               <TRAPGRADPULSE ADCFlag="2" ADCs="NX" Axis="GX" FlatTopArea="2*KMX" FlatTopTime="2.1" Name="P6" Observe="KMX=P.KMAXx, NX=P.Nx" PhaseLock="1"/>
+            </ATOMICSEQUENCE>
+            <ATOMICSEQUENCE Name="A4">
+               <TRAPGRADPULSE Area="-A/2" Axis="GX" Name="P7" Observe="A=P6.Area"/>
+               <TRAPGRADPULSE Area="-A" Axis="GY" Name="P8" Observe="A=P4.Area"/>
+               <TRAPGRADPULSE ADCFlag="1" Area="-A+4*Pi" Axis="GZ" Name="P9" Observe="A=P5.Area"/>
+            </ATOMICSEQUENCE>
+            <DELAYATOMICSEQUENCE Delay="TR" DelayType="B2E" Name="TR" Observe="TR=P.TR" StartSeq="A1"/>
+         </ConcatSequence>
+      </ConcatSequence>
+   </ConcatSequence>
+</Parameters>

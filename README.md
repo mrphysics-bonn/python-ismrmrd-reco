@@ -8,7 +8,7 @@ In this quick start, Cartesian and spiral sequences are created with PyPulseq. T
 
 Creating a sequence:
 1. Install the necessary dependencies by running `conda env create -f seqdev.yml`, which will create a new Python environment. Activate the environment with `conda activate seqdev`.
-2. Run the Python scripts "write_spiral.py" or "write_cartesian.py" in the directory "example_sequences/pypulseq". At the top of both scripts, protocol parameters and the sequence filename can be changed. 
+2. Run the Python scripts with `python write_spiral.py` or `python write_cartesian.py` in the directory "example_sequences/pypulseq". At the top of both scripts, protocol parameters and the sequence filename can be changed. 
 3. A Pulseq file (.seq) is created in the same directory and an ISMRMRD metadata file (.h5) is created in the folder "dependency/metadata". This metadata file is important for the reconstruction, as raw data obtained from Pulseq sequences does not contain any information, on how the kspace was acquired.
 
 Running a reconstruction:

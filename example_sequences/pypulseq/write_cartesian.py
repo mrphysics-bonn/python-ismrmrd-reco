@@ -23,7 +23,7 @@ from hdr import create_hdr
 
 # Parameters
 seq_name = 'gre_b0mapping' # sequence filename
-TE = [2.04e-3, 4.08e-3] # [TE1, TE2] atm only 2 echo times supported
+TE = [2.04e-3, 4.08e-3] # [TE1, TE2]
 fov = 220e-3
 res = 2e-3
 flip_angle = 15
@@ -39,7 +39,7 @@ prepscans = 40 # number of dummy preparation scans
 # System limits
 seq = Sequence()
 rf_dead_time = 100e-6 # lead time before rf can be applied
-rf_ringdown_time = 30e-6 # coil hold time (20e-6) + frequency reset time (10e-6)
+rf_ringdown_time = 30e-6 # scanner specific - Siemens: coil hold time (20e-6) + frequency reset time (10e-6)
 system = Opts(max_grad=max_grad, grad_unit='mT/m', max_slew=max_slew, slew_unit='T/m/s', rf_dead_time=rf_dead_time, rf_ringdown_time=rf_ringdown_time)
 
 # RF
@@ -164,7 +164,7 @@ for s in range(slices):
             for k in range(len(TE)):
                 acq = ismrmrd.Acquisition()
                 acq.idx.kspace_encode_step_1 = i
-                acq.idx.kspace_encode_step_2 = 0 # only 2D atm
+                acq.idx.kspace_encode_step_2 = 0 # 2D
                 acq.idx.slice = slc
                 acq.idx.contrast = k
                 if i == Ny-1:

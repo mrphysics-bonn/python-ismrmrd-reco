@@ -49,12 +49,12 @@ slices          = 9         # number of slices
 dist_fac        = 50          # distance factor for slices [%]
 averages        = 1         # number of averages
 
-refscan         = True      # Cartesian reference scan for sensmaps
+refscan         = True      # Cartesian reference scan for coil sensitivity maps
 prepscans       = 64        # number of preparation/dummy scans before GRE
 noisescans      = 16        # number of noise scans
 
 # ADC
-os_factor = 2               # oversampling factor (automatic 2x os from Siemens is not applied)
+os_factor       = 2     # oversampling factor (automatic 2x os from Siemens is not applied)
 
 # RF
 flip_angle      = 12        # flip angle of excitation pulse [°]
@@ -67,20 +67,20 @@ fatsat_tbp      = 2.1       # tbp of fatsat pulse
 
 # Gradients
 max_slew        = 120       # maximum slewrate [T/m/s] (system limit)
-spiral_slew     = 100       # maximum slew rate of spiral gradients - for pre Emph: set lower than max_slew
+spiral_slew     = 100       # maximum slew rate of spiral gradients
 max_grad        = 30        # maximum gradient amplitude [mT/m] (system limit)
-max_grad_sp     = 30        # maximum gradient amplitude of spiral gradients - for pre_emph: set lower than max_grad
+max_grad_sp     = 30        # maximum gradient amplitude of spiral gradients
 
 Nintl           = 15         # spiral interleaves
 redfac          = 1         # reduction/acceleration factor
-spiraltype      = 1         # 1: Spiral Out, 4: ROI, WIP: other spiral waveforms
+spiraltype      = 1         # 1: Spiral Out, 4: ROI, other types not yet supported
 spiral_os       = 1         # spiral oversampling in center
 
 #%% Limits, checks and preparations
 
 # Set System limits
 rf_dead_time = 100e-6 # lead time before rf can be applied
-rf_ringdown_time = 30e-6 # coil hold time (20e-6) + frequency reset time (10e-6)
+rf_ringdown_time = 30e-6 # scanner specific - Siemens: coil hold time (20e-6) + frequency reset time (10e-6)
 adc_dead_time = 20e-6
 system = Opts(max_grad=max_grad, grad_unit='mT/m', max_slew=max_slew, slew_unit='T/m/s', rf_dead_time=rf_dead_time, rf_ringdown_time=rf_ringdown_time, adc_dead_time=adc_dead_time)
 
@@ -164,7 +164,7 @@ readout_dur = N_spiral*system.grad_raster_time # readout duration [s]
 # write spiral readout blocks to list
 spirals = [{'deph': [None, None], 'spiral': [None, None], 'reph': [None, None]} for k in range(Nintl)]
 reph_dur = []
-save_sp = np.zeros((Nintl, 2, N_spiral)) # save gradients for FIRE reco
+save_sp = np.zeros((Nintl, 2, N_spiral)) # save gradients for reco
 rot_angle = np.linspace(0, max_rot, Nintl, endpoint=False)
 for k in range(Nintl):
     # rotate spiral gradients for shot selection
@@ -208,7 +208,7 @@ reph_delay = spoiler_dur - np.max(reph_dur)
 
 max_grad_sp_cmb = 1e3*np.max(np.sqrt(abs(spiral_x)**2+abs(spiral_y)**2))
 dwelltime = 1/(system.gamma*max_grad_sp_cmb*fov*os_factor)*1e6 # ADC dwelltime [s]
-dwelltime = ph.trunc_to_raster(dwelltime, decimals=7) # truncate dwelltime to 100 nanoseconds (scanner limit)
+dwelltime = ph.trunc_to_raster(dwelltime, decimals=7) # truncate dwelltime to 100 nanoseconds (Siemens scanner limit)
 min_dwelltime = 1e-6
 if dwelltime < min_dwelltime:
     dwelltime = min_dwelltime
@@ -272,7 +272,7 @@ meta_file.write_xml_header(hdr.toXML('utf-8'))
 seq = Sequence()
 
 # Definitions section in seq file
-seq.set_definition("Name", seq_name) # metadata file name is saved in Siemens header for FIRE reco
+seq.set_definition("Name", seq_name) # metadata file name is saved in Siemens header for reco
 seq.set_definition("FOV", [1e-3*fov, 1e-3*fov, slice_res]) # for FOV positioning
 seq.set_definition("Slice_Thickness", "%f" % (slice_res*(1+dist_fac*1e-2)*(slices-1)+slice_res)) # we misuse this to show the total covered head area in the GUI
 if num_segments > 1:

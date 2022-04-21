@@ -6,8 +6,12 @@ This repository contains a reconstruction pipeline for MRI data acquired with Pu
 
 In this quick start, Cartesian and spiral sequences are created with PyPulseq. The raw data collected with this sequence, is reconstructed and images are displayed. A Python and a Docker installation are required. Information on how to install Docker can be found below.
 
+Install dependencies:  
+1. Dependencies for sequence creation are defined in "seqdev.yml". Run `conda env create -f seqdev.yml` to install a new Python environment.
+2. Dependencies for reconstruction are defined in "ismrmrd_client.yml". Run `conda env create -f ismrmrd_client.yml` to install the environment or run `conda env update -f ismrmrd_client.yml -n seqdev` to add the reconstruction dependencies to the "seqdev" environment.
+
 Creating a sequence:
-1. Install the necessary dependencies by running `conda env create -f seqdev.yml`, which will create a new Python environment. Activate the environment with `conda activate seqdev`.
+1. Activate the Python environment with `conda activate seqdev`.
 2. Run the Python scripts with `python write_spiral.py` or `python write_cartesian.py` in the directory "example_sequences/pypulseq". At the top of both scripts, protocol parameters and the sequence filename can be changed. 
 3. A Pulseq file (.seq) is created in the same directory and an ISMRMRD metadata file (.h5) is created in the folder "dependency/metadata". This metadata file is important for the reconstruction, as raw data obtained from Pulseq sequences does not contain any information, on how the kspace was acquired.
 
@@ -15,13 +19,14 @@ Running a reconstruction:
 1. Pull the reconstruction container from Dockerhub: `docker pull mavel101/bart-reco-server`.
 2. Start the container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background.
 3. Example ISMRMRD raw data files are located in "example_data". Raw data conversion for Siemens data to ISMRMRD [3] is described below.
-4. Run a reconstruction by sending the data to the server.  
+4. Activate the Python environment with `conda activate ismrmrd_client`.
+5. Run a reconstruction by sending the data to the server.  
 Example Pulseq reconstruction: `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`. 
 Example JEMRIS reconstruction: `./send_data_jemris.sh example_data/simu/signals_spiralout_clean_slc30.h5 recon/out.h5`.  
-5. The metadata is automatically merged to the raw data during the reconstruction process. Logging information and debug files can be found in the "debug" folder.
-6. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in ISMRMRD image format. Image files will not be overwritten, but new images will be appended to existing files.
+6. The metadata is automatically merged to the raw data during the reconstruction process. Logging information and debug files can be found in the "debug" folder.
+7. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in ISMRMRD image format. Image files will not be overwritten, but new images will be appended to existing files.
 
-JEMRIS example sequences can be found in "example_sequences/jemris". Installation instructions and documentation regarding JEMRIS can be found on the projects website: https://github.com/JEMRIS/jemris/
+JEMRIS example sequences can be found in "example_sequences/jemris". Installation instructions and documentation regarding JEMRIS can be found on the projects website: https://github.com/JEMRIS/jemris/.
 
 ## Example sequences and data
 
@@ -53,7 +58,7 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 
 ## Sending data via client
 
-Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. A conda environment with the client can be installed, by using the provided `ismrmrd_client.yaml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by running `conda activate ismrmrd_client`.
+Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. A conda environment with the client can be installed, by using the provided `ismrmrd_client.yml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by running `conda activate ismrmrd_client`.
 Alternatively, the client can be installed in the current environment by running `pip install .` from the "python-ismrmrd-server" folder. The dependencies numpy, h5py and ismrmrd-python will automatically be installed. 
 
 To run an example spiral reconstruction:

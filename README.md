@@ -97,6 +97,8 @@ Some important scripts are explained in more detail:
 - `pulseq_helper.py`: Contains the funtions for mirroring metadata information from the metadata file to the streamed raw data.
 - `bart_pulseq.py`: Launches a BART reconstruction pipeline for Pulseq data, depending on the trajectory type 
 
+## Static offresonance correction support
+
 More reconstruction scripts and Dockerfiles including the PowerGrid reconstruction toolbox [6] for static offresonance correction support can be found in the "pulseq" branch of the sub-repository `python-ismrmrd-server` (https://github.com/pehses/python-ismrmrd-server/tree/pulseq).
 
 ## References

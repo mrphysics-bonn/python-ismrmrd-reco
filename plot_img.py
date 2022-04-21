@@ -21,7 +21,9 @@ for key in data['images']:
     if key=='xml':
         continue
     imgs.append(data['images'][key]['data'][:])
-    
+
+data.close()
+
 img_set = imgs[show_set][:]
 if np.iscomplexobj(img_set):
     img_set = abs(img_set)
@@ -42,5 +44,3 @@ if slices > 1:
 plt.figure(figsize=(10,10))
 plt.imshow(img_set[show_slice,0,0], 'gray', interpolation='none')
 plt.axis('off')
-
-data.close()

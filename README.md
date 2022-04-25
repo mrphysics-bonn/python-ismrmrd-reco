@@ -23,7 +23,7 @@ Running a reconstruction:
 5. Run a reconstruction by sending the data to the server.  
 Example Pulseq reconstruction: `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`. 
 Example JEMRIS reconstruction: `./send_data_jemris.sh example_data/simu/signals_spiralout_clean_slc30.h5 recon/out.h5`.  
-6. The metadata is automatically merged to the raw data during the reconstruction process. Logging information and debug files can be found in the "debug" folder.
+6. The metadata is automatically merged to the raw data during the reconstruction process. The metadata filename has to be saved in the user parameter section of the raw data file () Logging information and debug files can be found in the "debug" folder.
 7. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in MRD image format. Image files will not be overwritten, but new images will be appended to existing files.
 
 JEMRIS example sequences can be found in "example_sequences/jemris". Installation instructions and documentation regarding JEMRIS can be found on the projects website: https://github.com/JEMRIS/jemris/.
@@ -73,13 +73,14 @@ To run an example spiral reconstruction:
 ## Further information on acquisition and reconstruction
 ### Acquisition and reconstruction of Pulseq data
 
-For reconstruction of Pulseq data, a MRD metadata file has to be provided. This metadata file has to contain all necessary information for reconstruction such as counters, flags and other metadata. The metadata file has to be located in "dependency/metadata". 
+For reconstruction of Pulseq data, a MRD metadata file has to be provided. This metadata file has to contain all necessary information for reconstruction such as counters, flags and other metadata. The metadata file has to be located in "dependency/metadata".  
+IMPORTANT: The metadata filename has to be saved in the first user defined string parameter ("userParameterString") of the raw data ISMRMRD file in order to access the metadata in the reconstruction.  
 
-If the sequence is executed on a Siemens scanner, the following steps are necessary:
-- The metadata file name has to be stored in the free text parameter "tFree" of the raw data file. It will be converted to the first user defined string parameter in the MRD file.
-- The raw data has to be converted to the MRD format with the siemens_to_ismrmrd converter (https://github.com/ismrmrd/siemens_to_ismrmrd). After installation of the converter, `send_data_pulseq.sh` can handle Siemens raw data acquired with the Pulseq sequence.
-- The metadata filename is transferred to the first user defined string parameter of the MRD file by the converter. The parameter maps used for conversion are stored in "python-ismrmrd-server/parameters_maps".
-- The necessary parameters for reconstruction are listed in the functions "insert_hdr" and "insert_acq" in "python-ismrmrd-server/pulseq_helper.py".
+For Siemens data this is can automatically be done at file conversion:
+1. The metadata file should have the same name as the sequence.
+2. The sequence/metadata filename has to be stored in the free text parameter "tFree" of the raw data file. This is automatically done in the newest Pulseq interpreter sequence (v1.4.0).
+3. The raw data is converted to the MRD format with the siemens_to_ismrmrd converter (https://github.com/ismrmrd/siemens_to_ismrmrd). After installation of the converter, `send_data_pulseq.sh` can handle Siemens raw data acquired with the Pulseq sequence. The shell script uses the parameter maps in "python-ismrmrd-server/parameter_maps" for file conversion.
+4. Metadata merging is done by the functions "insert_hdr" and "insert_acq" in "python-ismrmrd-server/pulseq_helper.py".
 
 ### Reconstruction of JEMRIS simulation data
 

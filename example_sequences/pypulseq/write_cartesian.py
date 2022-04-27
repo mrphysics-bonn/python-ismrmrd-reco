@@ -49,7 +49,7 @@ rf, gz, gz_reph, rf_del = make_sinc_pulse(flip_angle=flip_angle * math.pi / 180,
 # Calculate readout gradient and ADC parameters
 delta_k = 1 / fov
 Nx = Ny = int(fov/res+0.5)
-samples = 2*Nx
+samples = 2*Nx # 2x oversampling
 gx_flat_time_us = int(1e6/readout_bw) # readout_bw is in Hz/Px
 dwelltime_us = gx_flat_time_us / samples
 gx_flat_time = round(1e-6*dwelltime_us*samples, 5)
@@ -76,7 +76,7 @@ if delay_TE1 < 0:
 if delay_TE2 < 0:
     raise ValueError(f"TE 2 too small by {1e3*abs(delay_TE2)} ms. Increase readout bandwidth.")
 
-# ADC with 2x oversampling
+# ADC 
 adc = make_adc(num_samples=samples, dwell=1e-6*dwelltime_us, delay=gx.rise_time, system=system)
 
 # RF spoiling

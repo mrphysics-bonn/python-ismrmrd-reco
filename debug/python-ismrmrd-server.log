@@ -1,0 +1,29 @@
+2022-05-01 15:29:28,716 - Starting server and listening for data at 0.0.0.0:9002
+2022-05-01 15:29:28,717 - Serving... 
+2022-05-01 15:31:02,054 - Accepting connection from: 172.17.0.1:51114
+2022-05-01 15:31:02,060 -     bart_pulseq
+2022-05-01 15:31:02,081 - Data is from a GE UHP 3T at 3.0T
+2022-05-01 15:31:02,641 - Starting bart_pulseq processing based on config
+2022-05-01 15:31:02,644 - Creating converter from 3 to 5
+2022-05-01 15:31:02,648 - Signature check passed with signature 9e1f5a26468244e8b66acbdc92012dba.
+2022-05-01 15:31:02,651 - Starting spiral reconstruction.
+2022-05-01 15:31:02,656 - Config: 
+bart_pulseq
+2022-05-01 15:31:02,656 - Incoming dataset contains 1 encodings
+2022-05-01 15:31:02,656 - Trajectory type 'spiral', matrix size (220 x 220 x 1), field of view (220.0 x 220.0 x 27.0)mm^3
+2022-05-01 15:31:02,656 - Reading in metadata acquisitions.
+2022-05-01 15:31:02,680 - <-- Received MRD_MESSAGE_ISMRMRD_ACQUISITION (1008) (total: 1)
+2022-05-01 15:31:02,706 - Processing a group of k-space data
+2022-05-01 15:31:02,737 - Trajectory shape = (3, 2768, 15) , Signal Shape = (1, 2768, 15, 32) 
+2022-05-01 15:31:18,182 - Image data is size (220, 220, 1)
+2022-05-01 15:31:18,201 - Sending images to client:
+[Image(head=ImageHeader(version: 1, data_type: 2, flags: 0, measurement_uid: 0, matrix_size: (220, 220, 1), field_of_view: (220.0, 220.0, 27.0), channels: 1, position: (0.0, 0.0, 0.0), read_dir: (-1.0, -0.0, -0.0), phase_dir: (0.0, 1.0, 0.0), slice_dir: (-0.0, -0.0, -1.0), patient_table_position: (0.0, 0.0, 0.0), average: 0, slice: 8, contrast: 0, phase: 0, repetition: 0, set: 0, acquisition_time_stamp: 0, physiology_time_stamp: (0, 0, 0), image_type: 0, image_index: 9, image_series_index: 1, user_int: (0, 0, 0, 0, 0, 0, 0, 0), user_float: (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), attribute_string_len: 0, ),meta={'DataRole': 'Image', 'ImageProcessingHistory': ['FIRE', 'PYTHON'], 'WindowCenter': '16384', 'WindowWidth': '32768', 'Keep_image_geometry': '1'},data=array([[[[0, 0, 0, ..., 1, 1, 0],
+         [0, 1, 1, ..., 0, 0, 0],
+         [0, 1, 1, ..., 0, 0, 0],
+         ...,
+         [1, 0, 0, ..., 2, 1, 1],
+         [0, 0, 0, ..., 1, 1, 1],
+         [0, 0, 0, ..., 1, 1, 0]]]], dtype=int16))]
+2022-05-01 15:31:18,203 - --> Sending MRD_MESSAGE_ISMRMRD_IMAGE (1022) (1 images)
+2022-05-01 15:31:18,204 - --> Sending MRD_MESSAGE_CLOSE (4)
+2022-05-01 15:31:18,204 - Socket closed

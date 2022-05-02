@@ -1,6 +1,6 @@
 # Reconstruction pipeline for Pulseq/JEMRIS data with example Sequences and Datasets
 
-This repository contains a reconstruction pipeline for MRI data acquired with Pulseq [1]. The data is reconstructed using the BART MRI Toolbox [2].
+This repository contains a reconstruction pipeline for MRI data acquired with Pulseq [1] or with the MR simulator JEMRIS [2]. The data is reconstructed using the BART MRI Toolbox [3].
 
 ## Quick start guide - from sequence to image
 
@@ -18,7 +18,7 @@ Creating a sequence:
 Running a reconstruction:
 1. Pull the reconstruction container from Dockerhub: `docker pull mavel101/bart-reco-server`.
 2. Start the container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background.
-3. Example MRD raw data files are located in "example_data". Raw data conversion for Siemens data to MRD [3] is described below.
+3. Example MRD raw data files are located in "example_data". Raw data conversion for Siemens data to MRD [4] is described below.
 4. Activate the Python environment with `conda activate ismrmrd_client`.
 5. Run a reconstruction by sending the data to the server.  
 Example Pulseq reconstruction: `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`. 
@@ -26,20 +26,21 @@ Example JEMRIS reconstruction: `./send_data_jemris.sh example_data/simu/signals_
 6. The metadata is automatically merged to the raw data during the reconstruction process. The metadata filename has to be saved in the user parameter section of the raw data file () Logging information and debug files can be found in the "debug" folder.
 7. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in MRD image format. Image files will not be overwritten, but new images will be appended to existing files.
 
-JEMRIS example sequences can be found in "example_sequences/jemris". Installation instructions and documentation regarding JEMRIS can be found on the projects website: https://github.com/JEMRIS/jemris/.
-
 ## Example sequences and data
 
 The relevant files for reconstruction are placed in subfolders:  
 
-- "example_data": Contains raw datasets from a real MR scanner and from simulation with JEMRIS [3], that can be reconstructed with the pipeline.
+- "example_data": Contains raw datasets from real MR scanners and from simulation with JEMRIS [2], that can be reconstructed with the pipeline.
 - "example_sequences": Contains the Pulseq sequence files, raw data was acquired with, as well as the source code for Python/PyPulseq sequences (incl. MRD [4] metadata creation) and XML files for JEMRIS sequences
 - "dependency": Contains reconstruction dependencies, mainly the MRD metadata files
 - "recon": Contains reconstructed images in hdf5 file. 
 
-The non-Cartesian example data provided in this repository was acquired with a spiral sequence and the reconstruction uses the GIRF predicted [5] spiral k-space trajectory.
+The non-Cartesian example data provided in this repository was acquired with a spiral sequence and the reconstruction uses the GIRF predicted [5] spiral k-space trajectory.  
+Additional example sequences, installation instructions and documentation regarding JEMRIS can be found on the projects website: https://github.com/JEMRIS/jemris/.  
+Pulseq sequence files can be converted to the GE compatible format TOPPE, using the converter at https://github.com/toppeMRI/PulseGEq.
 
-## Set up docker image and start reconstruction server
+## Detailed guide for the reconstruction server
+### Set up docker image and start reconstruction server
 
 - Install docker and add your user to the docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker` after docker installation)
 - A working docker image can be installed from Dockerhub with `docker pull mavel101/bart-reco-server`.
@@ -56,7 +57,7 @@ The container can be started by executing `./start_docker` or `./start_docker_it
 - `./start_docker_it` starts an interactive docker session in the bash shell. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed.
 - Use `./start_docker_gpu` or `./start_docker_it_gpu` for GPU support (nvidia-docker has to be installed)
 
-## Sending data via client
+### Sending data via client
 
 Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. A conda environment with the client can be installed, by using the provided `ismrmrd_client.yml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by running `conda activate ismrmrd_client`.
 Alternatively, the client can be installed in the current environment by running `pip install .` from the "python-ismrmrd-server" folder. The dependencies numpy, h5py and ismrmrd-python will automatically be installed. 
@@ -106,11 +107,11 @@ More reconstruction scripts and Dockerfiles including the PowerGrid reconstructi
 
 [1] Layton, K. J. et. al. Pulseq: A rapid and hardware-independent pulse sequence prototyping framework, MRM, 2017;77(4):1544-1552, http://pulseq.github.io/
 
-[2] BART Toolbox for Computational Magnetic Resonance Imaging, DOI: 10.5281/zenodo.592960, https://mrirecon.github.io/bart
+[2] Stöcker, T. et. al. High-Performance Computing MRI Simulations, MRM, 2010;64:186-193, https://www.jemris.org/
 
-[3] Inati, J. I. et. al. ISMRM Raw data format: A proposed standard for MRI raw datasets, MRM, 2017;77(1):411-421, https://ismrmrd.github.io
+[3] BART Toolbox for Computational Magnetic Resonance Imaging, DOI: 10.5281/zenodo.592960, https://mrirecon.github.io/bart
 
-[4] Stöcker, T. et. al. High-Performance Computing MRI Simulations, MRM, 2010;64:186-193, https://www.jemris.org/
+[4] Inati, J. I. et. al. ISMRM Raw data format: A proposed standard for MRI raw datasets, MRM, 2017;77(1):411-421, https://ismrmrd.github.io
 
 [5] Vannesjo, S. J. et al. Gradient System Characterization by Impulse Response Measurements with a Dynamic Field Camera. MRM
 2013;69:583-593

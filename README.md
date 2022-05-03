@@ -1,14 +1,19 @@
-# Reconstruction pipeline for Pulseq/JEMRIS data with example Sequences and Datasets
+# Reconstruction pipeline for MRI raw data acquired with Pulseq or JEMRIS
 
 This repository contains a reconstruction pipeline for MRI data acquired with Pulseq [1] or with the MR simulator JEMRIS [2]. The data is reconstructed using the BART MRI Toolbox [3].
 
+## Installation
+
+A [Python](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and a [Docker](https://docs.docker.com/get-docker/) installation are required to run the reconstruction server. Additionally, the following steps have to be done:
+1. After Docker installation, add your user to the docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker`)
+2. Pull the Docker image of the reconstruction server from Dockerhub: `docker pull mavel101/bart-reco-server`.  
+3. Python dependencies for the reconstruction are defined in "ismrmrd_client.yml". Run `conda env create -f ismrmrd_client.yml` to install the environment.  
+
+Optional dependencies for the creation of MR sequences with PyPulseq [4] are defined in "seqdev.yml". Run `conda env create -f seqdev.yml` to install a new Python environment or run `conda env update -f seqdev.yml -n ismrmrd_client` to add the dependencies to the "ismrmrd_client" environment.
+
 ## Quick start guide - from sequence to image
 
-In this quick start, Cartesian and spiral sequences are created with PyPulseq. The raw data collected with this sequence, is reconstructed and images are displayed. A Python and a Docker installation are required. Information on how to install Docker can be found below.
-
-Install dependencies:  
-1. Dependencies for sequence creation are defined in "seqdev.yml". Run `conda env create -f seqdev.yml` to install a new Python environment.
-2. Dependencies for reconstruction are defined in "ismrmrd_client.yml". Run `conda env create -f ismrmrd_client.yml` to install the environment or run `conda env update -f ismrmrd_client.yml -n seqdev` to add the reconstruction dependencies to the "seqdev" environment.
+In this quick start, Cartesian and spiral sequences are created with PyPulseq. The raw data collected with this sequence, is reconstructed and images are displayed. 
 
 Creating a sequence:
 1. Activate the Python environment with `conda activate seqdev`.
@@ -16,48 +21,44 @@ Creating a sequence:
 3. A Pulseq file (.seq) is created in the same directory and an MRD (originally ISMRMRD) metadata file (.h5) is created in the folder "dependency/metadata". This metadata file is important for the reconstruction, as raw data obtained from Pulseq sequences does not contain any information, on how the kspace was acquired.
 
 Running a reconstruction:
-1. Pull the reconstruction container from Dockerhub: `docker pull mavel101/bart-reco-server`.
-2. Start the container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background.
-3. Example MRD raw data files are located in "example_data". Raw data conversion for Siemens data to MRD [4] is described below.
-4. Activate the Python environment with `conda activate ismrmrd_client`.
-5. Run a reconstruction by sending the data to the server.  
+1. Start the Docker container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background.
+2. Activate the Python environment with `conda activate ismrmrd_client`.
+3. Run a reconstruction by sending the data to the server.  
 Example Pulseq reconstruction: `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`. 
 Example JEMRIS reconstruction: `./send_data_jemris.sh example_data/simu/signals_spiralout_clean_slc30.h5 recon/out.h5`.  
-6. The metadata is automatically merged to the raw data during the reconstruction process. The metadata filename has to be saved in the user parameter section of the raw data file () Logging information and debug files can be found in the "debug" folder.
-7. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in MRD image format. Image files will not be overwritten, but new images will be appended to existing files.
+5. Logging information and debug files can be found in the "debug" folder.
+6. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in MRD image format. Image files will not be overwritten, but new images will be appended to existing files.
+7. More example raw data files are located in "example_data". Raw data conversion for Siemens data to MRD [5] is described below.
 
 ## Example sequences and data
 
 The relevant files for reconstruction are placed in subfolders:  
 
 - "example_data": Contains raw datasets from real MR scanners and from simulation with JEMRIS [2], that can be reconstructed with the pipeline.
-- "example_sequences": Contains the Pulseq sequence files, raw data was acquired with, as well as the source code for Python/PyPulseq sequences (incl. MRD [4] metadata creation) and XML files for JEMRIS sequences
+- "example_sequences": Contains the Pulseq sequence files, raw data was acquired with, as well as the source code for Python/PyPulseq sequences (incl. MRD metadata creation) and XML files for JEMRIS sequences
 - "dependency": Contains reconstruction dependencies, mainly the MRD metadata files
 - "recon": Contains reconstructed images in hdf5 file. 
 
-The non-Cartesian example data provided in this repository was acquired with a spiral sequence and the reconstruction uses the GIRF predicted [5] spiral k-space trajectory.  
+The non-Cartesian example data provided in this repository was acquired with a spiral sequence and the reconstruction uses the GIRF predicted [6] spiral k-space trajectory.  
 Additional example sequences, installation instructions and documentation regarding JEMRIS can be found on the projects website: https://github.com/JEMRIS/jemris/.  
 Pulseq sequence files can be converted to the GE compatible format TOPPE, using the converter at https://github.com/toppeMRI/PulseGEq.
 
-## Detailed guide for the reconstruction server
-### Set up docker image and start reconstruction server
-
-- Install docker and add your user to the docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker` after docker installation)
-- A working docker image can be installed from Dockerhub with `docker pull mavel101/bart-reco-server`.
+## Further information on the reconstruction server
+### Docker image (latest build, GPU support, startup scripts)
 
 If you want to build the docker image from the latest Dockerfile in this repository, the following steps are required:
 - Clone the repository and run `git submodule update --init`
 - Run `./build_docker.sh` from the project folder. This builds the docker image on your system.
 
-The default docker container contains only CPU based reconstructions. A Docker container with GPU support can be build with: `./build_docker.sh python-ismrmrd-server/ bart_cuda`
-Note that this container is of larger size and that the GPU version need nvidia-docker installed (https://github.com/NVIDIA/nvidia-docker).
+The default docker image contains only CPU based reconstructions. A Docker image with GPU support can be build with: `./build_docker.sh python-ismrmrd-server/ bart_cuda`
+Note that this image is of larger size and that the GPU version needs nvidia-docker to be installed (https://github.com/NVIDIA/nvidia-docker).
 
 The container can be started by executing `./start_docker` or `./start_docker_it` from the project folder:
 - `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`)
 - `./start_docker_it` starts an interactive docker session in the bash shell. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed.
 - Use `./start_docker_gpu` or `./start_docker_it_gpu` for GPU support (nvidia-docker has to be installed)
 
-### Sending data via client
+### Sending data via the client
 
 Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. A conda environment with the client can be installed, by using the provided `ismrmrd_client.yml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by running `conda activate ismrmrd_client`.
 Alternatively, the client can be installed in the current environment by running `pip install .` from the "python-ismrmrd-server" folder. The dependencies numpy, h5py and ismrmrd-python will automatically be installed. 
@@ -71,8 +72,7 @@ To run an example spiral reconstruction:
 - The above command extends to `python python-ismrmrd-server/client.py -c bart_pulseq -g images -o recon/out.h5 example_data/scanner/raw_spiralout_gre_fatsat_7T.h5`. The option "-c" selects the configuration name for the current reconstruction, which is evaluated in `server.py` and starts the respective reconstruction script. Available options are "bart_pulseq" for Pulseq reconstructions and "bart_jemris" for JEMRIS reconstructions. The option -o defines the image output path and option -G defines the group name of the output images in the hdf5 file.
 - The script plot_img.py can be used to view reconstructed images via the Python library matplotlib
 
-## Further information on acquisition and reconstruction
-### Acquisition and reconstruction of Pulseq data
+### Reconstruction of Pulseq data
 
 For reconstruction of Pulseq data, a MRD metadata file has to be provided. This metadata file has to contain all necessary information for reconstruction such as counters, flags and other metadata. The metadata file has to be located in "dependency/metadata".  
 IMPORTANT: The metadata filename has to be saved in the first user defined string parameter ("userParameterString") of the raw data ISMRMRD file in order to access the metadata in the reconstruction.  
@@ -85,9 +85,9 @@ For Siemens data this is can automatically be done at file conversion:
 
 ### Reconstruction of JEMRIS simulation data
 
-Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecting the "-r" option in the simulation or by starting the BART recon in the GUI. However, the following prerequisites have to be met:
-- The reconstruction server has to be running.
-- The `client.py` (and its dependencies, see above) has to be installed in the conda environment, where the JEMRIS simulation is executed. Install the client by running `pip install .` from the "python-ismrmrd-server" folder. This lets you execute the client from anywhere. It is recommended to use the provided `ismrmrd_client.yml` to create a conda environment for the client.
+Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecting the "-r" option, when running JEMRIS in the command line or by starting the recon in the GUI with the "start reco" button. However, the following prerequisites have to be met:
+- The Docker image of the reconstruction server has to be installed. If JEMRIS is run from the command line, the reconstruction server also has to be started.
+- The `client.py` (and its dependencies) has to be installed in the conda environment, where the JEMRIS simulation is executed. This lets you execute the client from anywhere. It is recommended to use the provided `ismrmrd_client.yml` to create a conda environment for the client. Manual installation of the client is possible by running `pip install .` from the "python-ismrmrd-server" folder.
 
 Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described in "Sending data via client".
 
@@ -101,7 +101,7 @@ Some important scripts are explained in more detail:
 
 ## Static offresonance correction support
 
-More reconstruction scripts and Dockerfiles including the PowerGrid reconstruction toolbox [6] for static offresonance correction support can be found in the "pulseq" branch of the sub-repository `python-ismrmrd-server` (https://github.com/pehses/python-ismrmrd-server/tree/pulseq).
+More reconstruction scripts and Dockerfiles including the PowerGrid reconstruction toolbox [7] for static offresonance correction support can be found in the "pulseq" branch of the sub-repository `python-ismrmrd-server` (https://github.com/pehses/python-ismrmrd-server/tree/pulseq).
 
 ## References
 
@@ -111,9 +111,13 @@ More reconstruction scripts and Dockerfiles including the PowerGrid reconstructi
 
 [3] BART Toolbox for Computational Magnetic Resonance Imaging, DOI: 10.5281/zenodo.592960, https://mrirecon.github.io/bart
 
-[4] Inati, J. I. et. al. ISMRM Raw data format: A proposed standard for MRI raw datasets, MRM, 2017;77(1):411-421, https://ismrmrd.github.io
+[3] BART Toolbox for Computational Magnetic Resonance Imaging, DOI: 10.5281/zenodo.592960, https://mrirecon.github.io/bart
 
-[5] Vannesjo, S. J. et al. Gradient System Characterization by Impulse Response Measurements with a Dynamic Field Camera. MRM
+[4] Ravi, Keerthi, Sairam Geethanath, and John Vaughan. "PyPulseq: A Python Package for MRI Pulse Sequence Design." Journal of Open Source Software 4.42 (2019): 1725., https://github.com/imr-framework/pypulseq
+
+[5] Inati, J. I. et. al. ISMRM Raw data format: A proposed standard for MRI raw datasets, MRM, 2017;77(1):411-421, https://ismrmrd.github.io
+
+[6] Vannesjo, S. J. et al. Gradient System Characterization by Impulse Response Measurements with a Dynamic Field Camera. MRM
 2013;69:583-593
 
-[6] Cerjanic, A. et al. PowerGrid: A open source library for accelerated iterative magnetic resonance image reconstruction, Proc. Intl. Soc. Mag. Res. Med., 2016, http://mrfil.github.io/PowerGrid/
+[7] Cerjanic, A. et al. PowerGrid: A open source library for accelerated iterative magnetic resonance image reconstruction, Proc. Intl. Soc. Mag. Res. Med., 2016, http://mrfil.github.io/PowerGrid/

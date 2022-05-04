@@ -86,7 +86,7 @@ For Siemens data this is can automatically be done at file conversion:
 ### Reconstruction of JEMRIS simulation data
 
 Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecting the "-r" option, when running JEMRIS in the command line or by starting the recon in the GUI with the "start reco" button. However, the following prerequisites have to be met:
-- The Docker image of the reconstruction server has to be installed. If JEMRIS is run from the command line, the reconstruction server also has to be started.
+- The Docker image of the reconstruction server has to be pulled from Dockerhub (`docker pull mavel101/bart-reco-server`). If JEMRIS is running from the command line, the reconstruction server also has to be started.
 - The `client.py` (and its dependencies) has to be installed in the conda environment, where the JEMRIS simulation is executed. This lets you execute the client from anywhere. It is recommended to use the provided `ismrmrd_client.yml` to create a conda environment for the client. Manual installation of the client is possible by running `pip install .` from the "python-ismrmrd-server" folder.
 
 Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described in "Sending data via client".

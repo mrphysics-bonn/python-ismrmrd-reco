@@ -21,14 +21,15 @@ Creating a sequence:
 3. A Pulseq file (.seq) is created in the same directory and an MRD (originally ISMRMRD) metadata file (.h5) is created in the folder "dependency/metadata". This metadata file is important for the reconstruction, as raw data obtained from Pulseq sequences does not contain any information, on how the kspace was acquired.
 
 Running a reconstruction:
-1. Start the Docker container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background.
+1. Start the Docker container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background. You can attach to the container with `docker attach #containerID` (optional, check ID with `docker ps`).
 2. Activate the Python environment with `conda activate ismrmrd_client`.
 3. Run a reconstruction by sending the data to the server.  
 Example Pulseq reconstruction: `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`. 
 Example JEMRIS reconstruction: `./send_data_jemris.sh example_data/simu/signals_spiralout_clean_slc30.h5 recon/out.h5`.  
 5. Logging information and debug files can be found in the "debug" folder.
 6. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in MRD image format. Image files will not be overwritten, but new images will be appended to existing files.
-7. More example raw data files are located in "example_data". Raw data conversion for Siemens data to MRD [5] is described below.
+
+More example raw data files are located in "example_data". Raw data conversion for Siemens data to MRD [5] is described below.
 
 ## Example sequences and data
 
@@ -54,7 +55,7 @@ The default docker image contains only CPU based reconstructions. A Docker image
 Note that this image is of larger size and that the GPU version needs nvidia-docker to be installed (https://github.com/NVIDIA/nvidia-docker).
 
 The container can be started by executing `./start_docker` or `./start_docker_it` from the project folder:
-- `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`)
+- `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`). You can attach to the container with `docker attach #containerID`.
 - `./start_docker_it` starts an interactive docker session in the bash shell. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed.
 - Use `./start_docker_gpu` or `./start_docker_it_gpu` for GPU support (nvidia-docker has to be installed)
 

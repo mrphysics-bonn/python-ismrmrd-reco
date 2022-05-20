@@ -15,4 +15,4 @@ else
     OUT_FILE="$2"
 fi
 
-python python-ismrmrd-server/client.py -c bart_pulseq -o $OUT_FILE -G images $IN_FILE
+python python-ismrmrd-server/client.py -c powergrid_pulseq -o $OUT_FILE -G images $IN_FILE

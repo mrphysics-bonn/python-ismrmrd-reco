@@ -104,7 +104,7 @@ Some important scripts are explained in more detail:
 
 Static offresonance correction can be done with the PowerGrid reconstruction toolbox [7]. For this, a different Docker image is needed, which can be pulled with `docker pull mavel101/bart-powergrid-server` (Nvidia GPU required). Alternatively build the image with `./build_docker.sh python-ismrmrd-server/ bart_pg_gpu`. Run `./start_docker_gpu mavel101/bart-powergrid-server` to start the server. An example reconstruction can be started with `./send_data_pg.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5`.  
 
-The reconstruction script for a B0-corrected reconstruction is located in "python-ismrmrd-server/powergrid_pulseq.py". It is possible to use an external field map located at "dependency/fmap.npz" (as in the above example) or to calculate a field map from a calibration scan within the same sequence. For more information, contact the author.
+The reconstruction script for a B0-corrected reconstruction is located in "python-ismrmrd-server/powergrid_pulseq.py". It is possible to use an external field map located at "dependency/fmap.npz" (as in the above example) or to calculate a field map from a calibration scan within the same sequence. The unit of the field map has to be rad/s. For more information, contact the author.
 
 ## Author
 

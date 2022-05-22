@@ -9,4 +9,9 @@ fi
 dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
 echo $dir
-docker run --gpus all -d -t --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share -v $dir/python-ismrmrd-server:/opt/code/python-ismrmrd-server --rm $TAG
+
+if [ "$(ls -A $dir/python-ismrmrd-server)" ]; then
+    docker run --gpus all -d -t --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share -v $dir/python-ismrmrd-server:/opt/code/python-ismrmrd-server --rm $TAG
+else
+    docker run --gpus all -d -t --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share --rm $TAG
+fi

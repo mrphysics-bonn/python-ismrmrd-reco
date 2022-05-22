@@ -4,6 +4,7 @@ This repository contains a reconstruction pipeline for MRI data acquired with Pu
 
 ## Installation
 
+Clone the repository with the submodule: `git clone --recursive https://github.com/mrphysics-bonn/python-ismrmrd-reco.git`.
 A [Python](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and a [Docker](https://docs.docker.com/get-docker/) installation are required to run the reconstruction server. Additionally, the following steps have to be done:
 1. After Docker installation, add your user to the docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker`)
 2. Pull the Docker image of the reconstruction server from Dockerhub: `docker pull mavel101/bart-reco-server`.  

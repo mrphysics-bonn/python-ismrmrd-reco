@@ -8,5 +8,5 @@ dependencies:
     - pip:
         - sigpy
         - ismrmrd
-        - git+https://github.com/mavel101/pypulseq.git@dev
+        - git+https://github.com/mavel101/pypulseq.git@dev_mv
         - git+https://github.com/mrphysics-bonn/spiraltraj.git

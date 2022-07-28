@@ -3,7 +3,7 @@
 # This code only works with a custom PyPulseq version that can be obtained from https://github.com/mavel101/pypulseq/tree/dev_mv
 
 #%%
-from inspect import signature
+
 import math
 import numpy as np
 import os

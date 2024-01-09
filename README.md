@@ -101,11 +101,13 @@ Some important scripts are explained in more detail:
 - `pulseq_helper.py`: Contains the funtions for mirroring metadata information from the metadata file to the streamed raw data.
 - `bart_pulseq.py`: Launches a BART reconstruction pipeline for Pulseq data, depending on the trajectory type 
 
-## Experimental: Static offresonance correction support
+## Static offresonance correction & higher order image reconstruction
 
-Static offresonance correction can be done with the PowerGrid reconstruction toolbox [7]. For this, a different Docker image is needed, which can be pulled with `docker pull mavel101/bart-powergrid-server` (Nvidia GPU required). Alternatively build the image with `./build_docker.sh python-ismrmrd-server/ bart_pg_gpu`. Run `./start_docker_gpu mavel101/bart-powergrid-server` to start the server. An example reconstruction can be started with `./send_data_pg.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5`.  
+Static offresonance correction is available via the PowerGrid reconstruction toolbox [7]. For this, a different Docker image is needed, which can be pulled with `docker pull mavel101/bart_pg_gpu` (Nvidia GPU required). Alternatively build the image with `./build_docker.sh python-ismrmrd-server/ bart_pg_gpu`. Run `./start_docker_gpu mavel101/bart_pg_gpu` to start the server. An example reconstruction can be started with `./send_data_pg.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5`.  
 
 The reconstruction script for a B0-corrected reconstruction is located in "python-ismrmrd-server/powergrid_pulseq.py". It is possible to use an external field map located at "dependency/fmap.npz" (as in the above example) or to calculate a field map from a calibration scan within the same sequence. The unit of the field map has to be rad/s. For more information, contact the author.
+
+Higher order image reconstruction is also possible, if data from a field camera is available in the trajectory field of the MRD file. For more information on the data structure, see "python-ismrmrd-server/powergrid_pulseq_ho.py" or contact the author.
 
 ## Author
 
@@ -117,8 +119,6 @@ Marten Veldmann (marten.veldmann@dzne.de)
 [1] Layton, K. J. et. al. Pulseq: A rapid and hardware-independent pulse sequence prototyping framework, MRM, 2017;77(4):1544-1552, http://pulseq.github.io/
 
 [2] Stöcker, T. et. al. High-Performance Computing MRI Simulations, MRM, 2010;64:186-193, https://www.jemris.org/
-
-[3] BART Toolbox for Computational Magnetic Resonance Imaging, DOI: 10.5281/zenodo.592960, https://mrirecon.github.io/bart
 
 [3] BART Toolbox for Computational Magnetic Resonance Imaging, DOI: 10.5281/zenodo.592960, https://mrirecon.github.io/bart
 

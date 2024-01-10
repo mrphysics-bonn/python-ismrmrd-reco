@@ -107,7 +107,7 @@ Static offresonance correction is available via the PowerGrid reconstruction too
 
 The reconstruction script for a B0-corrected reconstruction is located in "python-ismrmrd-server/powergrid_pulseq.py". It is possible to use an external field map located at "dependency/fmap.npz" (as in the above example) or to calculate a field map from a calibration scan within the same sequence. The unit of the field map has to be rad/s. For more information, contact the author.
 
-Higher order image reconstruction is also possible, if data from a field camera is available in the trajectory field of the MRD file. For more information on the data structure, see "python-ismrmrd-server/powergrid_pulseq_ho.py" or contact the author.
+Higher order image reconstruction [8] is also possible, if data from a field camera is available in the trajectory field of the MRD file. For more information on the data structure, see "python-ismrmrd-server/powergrid_pulseq_ho.py" or contact the author.
 
 ## Author
 
@@ -130,3 +130,5 @@ Marten Veldmann (marten.veldmann@dzne.de)
 2013;69:583-593
 
 [7] Cerjanic, A. et al. PowerGrid: A open source library for accelerated iterative magnetic resonance image reconstruction, Proc. Intl. Soc. Mag. Res. Med., 2016, http://mrfil.github.io/PowerGrid/
+
+[8] Wilm, BJ et. al. Higher Order Reconstruction for MRI in the Presence of Spatiotemporal Field Perturbations. MRM, 2011;65(6):1690–1701

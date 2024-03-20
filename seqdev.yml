@@ -4,9 +4,9 @@ channels:
 dependencies:
     - python=3.8
     - pip
-    - numpy
+    - numpy=1.23.5
     - pip:
-        - sigpy
-        - ismrmrd
+        - sigpy==0.1.25
+        - ismrmrd==1.13.1
         - git+https://github.com/mavel101/pypulseq.git@dev_mv
         - git+https://github.com/mrphysics-bonn/spiraltraj.git

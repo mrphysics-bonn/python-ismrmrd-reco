@@ -1,16 +1,11 @@
 #!/bin/bash
 
 if [ "$#" -lt 1 ]; then
-    TAG="bart"
+    TAG="mavel101/bart-reco-server"
 else
     TAG="$1"
 fi
 
 dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
-echo $dir
-if [ "$(ls -A $dir/python-ismrmrd-server)" ]; then
-    docker run -d -t --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share -v $dir/python-ismrmrd-server:/opt/code/python-ismrmrd-server --rm $TAG
-else
-    docker run -d -t --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share --rm $TAG
-fi
+docker run -d -t --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share --rm $TAG

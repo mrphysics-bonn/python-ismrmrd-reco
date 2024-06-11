@@ -55,10 +55,9 @@ If you want to build the docker image from the latest Dockerfile in this reposit
 The default docker image contains only CPU based reconstructions. A Docker image with GPU support can be build with: `./build_docker.sh python-ismrmrd-server/ bart_cuda`
 Note that this image is of larger size and that the GPU version needs nvidia-docker to be installed (https://github.com/NVIDIA/nvidia-docker).
 
-The container can be started by executing `./start_docker` or `./start_docker_it` from the project folder:
+The container can be started by executing `./start_docker` from the project folder:
 - `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`). You can attach to the container with `docker attach #containerID`.
-- `./start_docker_it` starts an interactive docker session in the bash shell. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed.
-- Use `./start_docker_gpu` or `./start_docker_it_gpu` for GPU support (nvidia-docker has to be installed)
+- Use `./start_docker_gpu` for GPU support (nvidia-docker has to be installed)
 
 ### Sending data via the client
 
@@ -95,7 +94,8 @@ Reconstruction of already simulated data can also be started by running `send_da
 
 ### Extend & Modify existing reconstruction
 
-If the scripts `./start_docker` or `./start_docker_it` were used to start the docker container, the reconstruction codebase in the `python-ismrmrd-server` subdirectory is mounted in the active container. Changes to the reconstruction scripts will immediately applied in a new reconstruction started. If subscripts are altered, a restart of the reconstruction server might be necessary.
+If the scripts `./start_docker_it` or `./start_docker_it_gpu` are used to start the docker container, the reconstruction codebase in the `python-ismrmrd-server` subdirectory is mounted in the active container and an interactive docker session in the bash shell is started. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed. Note, that the dependencies in the codebase might have changed and the latest build of the Docker container might be necessary to run reconstructions.
+. Changes to the reconstruction scripts will immediately applied in a new reconstruction started. If subscripts are altered, a restart of the reconstruction server might be necessary.
 Some important scripts are explained in more detail:  
 - `server.py`: New reconstruction scripts can be added here and a new configuration name should be assigned. The new reconstruction can be started sending data via `client.py` with the new configuration name by using the "-c" option (see above).
 - `pulseq_helper.py`: Contains the funtions for mirroring metadata information from the metadata file to the streamed raw data.

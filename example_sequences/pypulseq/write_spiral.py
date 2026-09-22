@@ -13,7 +13,7 @@ from pypulseq.Sequence.sequence import Sequence
 from pypulseq.make_adc import make_adc
 from pypulseq.make_sinc_pulse import make_sinc_pulse
 from pypulseq.make_gauss_pulse import make_gauss_pulse
-from pypulseq.make_trap_pulse import make_trapezoid
+from pypulseq.make_trapezoid import make_trapezoid
 from pypulseq.make_delay import make_delay
 from pypulseq.opts import Opts
 from pypulseq.calc_duration import calc_duration
@@ -99,9 +99,9 @@ if spiraltype!=1 and spiraltype!=4:
 #%% RF Pulse and slab/slice selection gradient
 
 # make rf pulse and calculate duration of excitation and rewinding
-rf, gz, gz_rew, rf_del = make_sinc_pulse(flip_angle=flip_angle*np.pi/180, system=system, duration=rf_dur, slice_thickness=slice_res,
-                            apodization=0.5, time_bw_product=tbp_exc, use='excitation', return_gz=True, return_delay=True)
-exc_to_rew = rf_del.delay - rf_dur/2 - rf.delay # time from middle of rf pulse to rewinder, rf_del.delay equals the block length
+rf, gz, gz_rew = make_sinc_pulse(flip_angle=flip_angle*np.pi/180, system=system, duration=rf_dur, slice_thickness=slice_res,
+                            apodization=0.5, time_bw_product=tbp_exc, use='excitation', return_gz=True)
+exc_to_rew = calc_duration(rf) - rf_dur/2 - rf.delay # time from middle of rf pulse to rewinder, rf_del.delay equals the block length
 rew_dur = calc_duration(gz_rew)
 
 # RF spoiling parameters
@@ -118,7 +118,7 @@ if fatsat:
     fatsat_fa = 110 # flip angle [°]
     fatsat_dur = ph.round_up_to_raster(fatsat_tbp/fatsat_bw, decimals=5)
 
-    rf_fatsat, fatsat_del = make_gauss_pulse(flip_angle=fatsat_fa*np.pi/180, duration=fatsat_dur, bandwidth=fatsat_bw, freq_offset=B0*ph.fw_shift, system=system, return_delay=True)
+    rf_fatsat = make_gauss_pulse(flip_angle=fatsat_fa*np.pi/180, duration=fatsat_dur, bandwidth=fatsat_bw, freq_offset=B0*ph.fw_shift, system=system)
 
 # echo time delay
 min_te = exc_to_rew + rew_dur + system.adc_dead_time
@@ -191,10 +191,6 @@ for k in range(Nintl):
         spirals[k]['reph'][0] = make_trapezoid(channel='x', system=system, amplitude=amp_x, flat_time=ftop_x, rise_time=ramp_x)
         spirals[k]['reph'][1] = make_trapezoid(channel='y', system=system, amplitude=amp_y, flat_time=ftop_y, rise_time=ramp_y)
         reph_dur.append(max(ftop_x+2*ramp_x, ftop_y+2*ramp_y))
-
-
-# check for acoustic resonances (checks only spirals)
-freq_max = ph.check_resonances([spiral_x,spiral_y])
 
 #%% Gradient Spoiler on slice axis
 
@@ -328,12 +324,12 @@ for s in range(slices):
             adc.phase_offset = rf_phase / 180 * np.pi
         if fatsat:
             rf_fatsat.phase_offset = rf_phase / 180 * np.pi
-            seq.add_block(rf_fatsat, fatsat_del)
+            seq.add_block(rf_fatsat)
             seq.add_block(spoiler_z)
         rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
         rf_phase = divmod(rf_phase + rf_inc, 360.0)[1]
         
-        seq.add_block(rf,gz,rf_del)
+        seq.add_block(rf,gz)
         seq.add_block(gz_rew)
         seq.add_block(te_delay)
         seq.add_block(spirals[0]['spiral'][0], spirals[0]['spiral'][1], adc_delay)
@@ -347,7 +343,7 @@ for s in range(slices):
             min_tr = exc_to_rew + TE + adc_delay.delay + spoiler_dur  
 
         if fatsat:
-            min_tr += fatsat_del.delay + spoiler_dur
+            min_tr += calc_duration(rf_fatsat) + spoiler_dur
         if TR < min_tr:
             raise ValueError('Minimum TR is {} ms.'.format(min_tr*1e3))
         tr_delay = make_delay(d=TR-min_tr)
@@ -361,13 +357,13 @@ for s in range(slices):
                 adc.phase_offset = rf_phase / 180 * np.pi
             if fatsat:
                 rf_fatsat.phase_offset = rf_phase / 180 * np.pi # always use RF spoiling for fat sat pulse
-                seq.add_block(rf_fatsat, fatsat_del)
+                seq.add_block(rf_fatsat)
                 seq.add_block(spoiler_z)
             rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
             rf_phase = divmod(rf_phase + rf_inc, 360.0)[1]
 
             # excitation
-            seq.add_block(rf,gz,rf_del)
+            seq.add_block(rf,gz)
             seq.add_block(gz_rew)
 
             # spiral readout block with spoiler gradient
@@ -384,7 +380,7 @@ for s in range(slices):
 
             # delay at end of one TR
             if fatsat:
-                min_tr += fatsat_del.delay + spoiler_dur
+                min_tr += calc_duration(rf_fatsat) + spoiler_dur
             if TR < min_tr:
                 raise ValueError('Minimum TR is {} ms.'.format(min_tr*1e3))
             tr_delay = make_delay(d=TR-min_tr)
@@ -413,9 +409,12 @@ for s in range(slices):
     # avg
 # slices
 
+
+# check for acoustic resonances (checks only spirals)
+freq_max = ph.check_resonances([spiral_x,spiral_y], scanner='skyra', seq=seq)
+
 # write sequence and add hash to metadata
-seq.write(seq_name+'.seq')
-seq_hash = seq.get_hash()
+seq_hash = seq.write(seq_name+'.seq')
 signature = ismrmrd.xsd.userParameterStringType()
 signature.name = 'seq_signature'
 signature.value = seq_hash

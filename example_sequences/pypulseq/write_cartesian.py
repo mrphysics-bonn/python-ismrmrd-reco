@@ -15,7 +15,7 @@ from pypulseq.calc_duration import calc_duration
 from pypulseq.make_adc import make_adc
 from pypulseq.make_delay import make_delay
 from pypulseq.make_sinc_pulse import make_sinc_pulse
-from pypulseq.make_trap_pulse import make_trapezoid
+from pypulseq.make_trapezoid import make_trapezoid
 from pypulseq.opts import Opts
 
 import pulseq_helper as ph
@@ -43,8 +43,8 @@ rf_ringdown_time = 30e-6 # scanner specific - Siemens: coil hold time (20e-6) + 
 system = Opts(max_grad=max_grad, grad_unit='mT/m', max_slew=max_slew, slew_unit='T/m/s', rf_dead_time=rf_dead_time, rf_ringdown_time=rf_ringdown_time)
 
 # RF
-rf, gz, gz_reph, rf_del = make_sinc_pulse(flip_angle=flip_angle * math.pi / 180, duration=rf_dur, slice_thickness=slice_res,
-                            apodization=0.5, time_bw_product=tbp, system=system, return_gz=True, return_delay=True)
+rf, gz, gz_reph = make_sinc_pulse(flip_angle=flip_angle * math.pi / 180, duration=rf_dur, slice_thickness=slice_res,
+                            apodization=0.5, time_bw_product=tbp, system=system, return_gz=True)
 
 # Calculate readout gradient and ADC parameters
 delta_k = 1 / fov
@@ -131,7 +131,7 @@ for s in range(slices):
         rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
         rf_phase = divmod(rf_phase + rf_inc, 360.0)[1]
 
-        seq.add_block(rf, gz, rf_del)
+        seq.add_block(rf, gz)
         gy_pre = make_trapezoid(channel='y', area=0, duration=gy_pre_dur, system=system)
         seq.add_block(gx_pre, gy_pre, gz_reph)
         seq.add_block(make_delay(delay_TE1))
@@ -149,7 +149,7 @@ for s in range(slices):
         rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
         rf_phase = divmod(rf_phase + rf_inc, 360.0)[1]
 
-        seq.add_block(rf, gz, rf_del)
+        seq.add_block(rf, gz)
         gy_pre = make_trapezoid(channel='y', area=phase_areas[i], duration=gy_pre_dur, system=system)
         seq.add_block(gx_pre, gy_pre, gz_reph)
         seq.add_block(make_delay(delay_TE1))
@@ -177,8 +177,7 @@ for s in range(slices):
 meta_file.append_array("echo_times", np.asarray(TE))
 
 # write sequence and add hash to metadata
-seq.write(seq_name+'.seq')
-seq_hash = seq.get_hash()
+seq_hash = seq.write(seq_name+'.seq')
 signature = ismrmrd.xsd.userParameterStringType()
 signature.name = 'seq_signature'
 signature.value = seq_hash

@@ -3,13 +3,11 @@ helper functions for spiral pulseq sequence
 """   
 
 import numpy as np
+import matplotlib.pyplot as plt
 import math
 
 dt_grad  = 10e-6     # gradient raster [s]
-dt_skope = 1e-6      # skope raster [s]
-dt_quot  = int(dt_grad/dt_skope)
-
-fw_shift = -3.3e-6*42.57e6 # fat water frequency shift [Hz] acc to Siemens diffusion seq (~ 7T*gamma*-3.3e-6) 
+fw_shift = 3.3e-6 # unsigned fat water shift [ppm]
 
 #############
 # FFTs
@@ -23,10 +21,10 @@ def ifft(sig, dim=None):
     :param dim: vector of dimensions to transform
     :returns: data in k-space (along transformed dimensions)
     """
-    import collections
+    import collections.abc
     if dim is None:
         dim = range(sig.ndim)
-    elif not isinstance(dim, collections.Iterable):
+    elif not isinstance(dim, collections.abc.Iterable):
         dim = [dim]
 
     sig = np.fft.ifftshift(sig, axes=dim)
@@ -43,10 +41,10 @@ def fft(sig, dim=None):
     :param dim: vector of dimensions to transform
     :returns: data in k-space (along transformed dimensions)
     """
-    import collections
+    import collections.abc
     if dim is None:
         dim = range(sig.ndim)
-    elif not isinstance(dim, collections.Iterable):
+    elif not isinstance(dim, collections.abc.Iterable):
         dim = [dim]
 
     sig = np.fft.ifftshift(sig, axes=dim)
@@ -89,7 +87,7 @@ def add_gradients(grads: list, system=None):
     grad_length = []
     grad_list = []
     for grad in grads:
-        w = waveform_from_seqblock(grad)
+        w = waveform_from_seqblock(grad, system)
         grad_list.append(w)
         grad_length.append(len(w))
     
@@ -102,27 +100,39 @@ def add_gradients(grads: list, system=None):
 
     return make_arbitrary_grad(channel=channel, waveform=added_grad, system=system)
 
-def waveform_from_seqblock(seq_block):
+def trapezoid(amplitude, rise_time, flat_time, fall_time, dt=1e-5):
+    # Time segments
+    t_rise = np.arange(dt/2, rise_time, dt)
+    t_flat = np.arange(dt/2, flat_time, dt)
+    t_fall = np.arange(dt/2, fall_time, dt)
+
+    # Signal segments
+    rise = (amplitude / rise_time) * t_rise
+    plateau = np.ones_like(t_flat) * amplitude
+    fall = amplitude - (amplitude / fall_time) * t_fall
+
+    # Concatenate full waveform
+    waveform = np.concatenate((rise, plateau, fall))
+
+    return waveform
+
+def waveform_from_seqblock(grad, system):
     """
     extracts gradient waveform from Pypulseq sequence block
     """
-    from pypulseq.Sequence.sequence import Sequence
 
-    if seq_block.channel == 'x':
-        axis = 0
-    elif seq_block.channel == 'y':
-        axis = 1
-    elif seq_block.channel == 'z':
-        axis = 2
+    if grad.type == 'trap':
+        waveform = trapezoid(grad.amplitude, grad.rise_time, grad.flat_time, grad.fall_time, dt=system.grad_raster_time)
     else:
-        raise ValueError('No valid gradient waveform')
-    dummy_seq = Sequence() # helper dummy sequence
-    dummy_seq.add_block(seq_block)
-    return dummy_seq.gradient_waveforms()[axis,:-1] # last value is a zero that does not belong to the waveform
+        waveform = grad.waveform
+
+    waveform = np.concatenate((np.zeros(round(grad.delay / system.grad_raster_time)), waveform))
+
+    return waveform
 
 def trap_from_area(area, system, slewrate = None, max_grad = None):
     """
-    Calculate trapezoidal gradient from gradient area/moment
+    Calculate minimum time trapezoidal gradient from gradient area/moment
     In the last step the amplitude is recalculated to get the right moment and sign of the gradient
 
     area: Gradient area [1/m]
@@ -169,11 +179,6 @@ def calc_triang_wf(amp, ftop, ramp):
     wf = np.concatenate((ramp_wf, amp*np.ones(int(ftop/10e-6+0.5)), ramp_wf[::-1]))
     return wf
 
-#############
-# Time raster functions
-#############
-
-
 def rot_grad(gx, gy, phi):
     """
     rotate gradient with 2D rotation matrix
@@ -188,12 +193,25 @@ def rot_grad(gx, gy, phi):
 # Time raster functions
 #############
 
-def round_up_to_raster(number, decimals=0):
+def round_up_to_raster(number, decimals=5, tol=1e-10):
     """
-    round number up to a specific number of decimal places.
+    Round number up to a specific number of decimal places.
+    Rounds up only if the digit beyond the desired precision exceeds a tolerance.
+    This avoids rounding up for tiny floating point errors.
+    
+    Parameters:
+    - number: float, the value to round
+    - decimals: int, number of decimal places
+    - tol: float, minimum excess to consider as real (not floating point noise)
     """
     multiplier = 10 ** decimals
-    return math.ceil(number * multiplier) / multiplier
+    scaled = number * multiplier
+    rounded = math.floor(scaled)
+
+    if scaled - rounded > tol:
+        rounded += 1
+
+    return rounded / multiplier
 
 def trunc_to_raster(number, decimals=0):
     """
@@ -213,24 +231,59 @@ def trunc_to_raster(number, decimals=0):
 # Gradient resonance check
 #############
 
-def check_resonances(grads):
-    """ Checks the gradient waveform for forbidden acoustic resonances
+def check_resonances(grads, scanner, seq=None):
+    """ Checks is the maximum frequency of the gradient waveform is in the resonance range.
+
+    grads: list of gradient waveform on gradient raster (10us), e.g. [grad_x, grad_y]
+    resonances: list of tuples describing the resonance bands in [Hz], e.g. [(100,200), (1000,1200)]
+    seq: Provide sequence object to plot resonances of whole sequence (optional)
     """
+
+    if scanner == '7tplus':
+        # 7T Plus resonances
+        resonances = [(500,600), (930, 1280)]
+    elif scanner == 'terra':
+        # 7T Terra resonances
+        resonances = [(312,422), (450, 650), (900,1250)]
+    elif scanner == 'skyra':
+        # 3T Skyra resonances
+        resonances = [(535, 635), (1010,1230)]
+    elif scanner == 'connectom':
+        # 3T Connectom resonances
+        resonances = [(280,340), (546, 646), (1000,1500)]
+    else:
+        print(f"\033[93mWARNING:\033[0m No resonance frequencies defined for scanner {scanner}. Fallback to 7T Plus resonances.")
+        resonances = [(500,600), (930, 1280)]
+
     freq_max = []
-    warning = False
-    for key,grad in enumerate(grads):
+    grad_ft_list = []
+    for key, grad in enumerate(grads):
         if len(grad)<20000:
             grad = np.concatenate((grad,np.zeros(20000-len(grad)))) # add zeros for higher freq resolution
-        grad_ft   = fft(grad, dim=-1)
-        freq      = np.arange(-1/(2*dt_grad), 1/(2*dt_grad), 1/(dt_grad*len(grad)))
-        argmax    = np.argmax(abs(grad_ft[len(grad)//2:]), axis=-1)
+        grad_ft = fft(grad, dim=-1)
+        freq = np.arange(-1/(2*dt_grad), 1/(2*dt_grad), 1/(dt_grad*len(grad)))
+        argmax = np.argmax(abs(grad_ft[len(grad)//2:]), axis=-1)
         freq_max.append(freq[len(grad)//2 + argmax]) # peak frequencies from gradient waveform
-        if (500 <= freq_max[key] <= 600 or 930 <= freq_max[key] <= 1280):
-            warning = True
+        grad_ft_list.append(grad_ft)
+        for res in resonances:
+            if (res[0] <= freq_max[key] <= res[1]):
+                print(f"\033[91mWARNING:\033[0m Frequency peak {freq_max[key]:.0f} Hz of axis {key} is in the forbidden range of {resonances}. "
+                      "Plot gradient spectrum and check strength of peak.")
+    
+    grad_ft_arr = np.array(grad_ft_list)
+    plt.figure()
+    for key, grad_ft in enumerate(grad_ft_arr):
+        plt.plot(freq, abs(grad_ft), label=f'Grad axis {key}')
+        plt.xlim(0, 2000)
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Magnitude')
+    plt.legend()
+    for res in resonances:
+        plt.axvspan(res[0], res[1], color='red', alpha=0.3)
 
-    if warning:
-        print('WARNING: Frequency peak {:.0f} Hz of axis {} is in the forbidden range of 500-600Hz or 930-1280 Hz.'.format(freq_max[key],key))
-    else:
-        print('Acoustic resonance check succesful.')
+    if seq is not None:
+        resonances_for_spectrum = [{'frequency': res[0]+(res[1]-res[0])/2, 'bandwidth': (res[1]-res[0])} for res in resonances]
+        seq.calculate_gradient_spectrum(acoustic_resonances=resonances_for_spectrum)
+
     return freq_max
     

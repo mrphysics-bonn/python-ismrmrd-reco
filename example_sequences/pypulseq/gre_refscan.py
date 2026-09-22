@@ -16,7 +16,7 @@ from pypulseq.calc_duration import calc_duration
 from pypulseq.make_adc import make_adc
 from pypulseq.make_delay import make_delay
 from pypulseq.make_sinc_pulse import make_sinc_pulse
-from pypulseq.make_trap_pulse import make_trapezoid
+from pypulseq.make_trapezoid import make_trapezoid
 from pypulseq.opts import Opts
 
 import pulseq_helper as ph
@@ -30,8 +30,8 @@ def gre_refscan(seq, meta_file=None, system=Opts(), params=None):
         params = {"fov":210e-3, "res":3e-3, "flip_angle":12, "rf_dur":1e-3, "tbp": 2, "slices":1, "slice_res":2e-3, "dist_fac":0, "readout_bw": 600}
 
     # RF
-    rf, gz, gz_reph, rf_del = make_sinc_pulse(flip_angle=params["flip_angle"] * math.pi / 180, duration=params["rf_dur"], slice_thickness=params["slice_res"],
-                                apodization=0.5, time_bw_product=params["tbp"], system=system, return_gz=True, return_delay=True)
+    rf, gz, gz_reph = make_sinc_pulse(flip_angle=params["flip_angle"] * math.pi / 180, duration=params["rf_dur"], slice_thickness=params["slice_res"],
+                                apodization=0.5, time_bw_product=params["tbp"], system=system, return_gz=True)
 
     # Calculate readout gradient and ADC parameters
     delta_k = 1 / params["fov"]
@@ -94,7 +94,7 @@ def gre_refscan(seq, meta_file=None, system=Opts(), params=None):
             rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
             rf_phase = divmod(rf_phase + rf_inc, 360.0)[1]
 
-            seq.add_block(rf, gz, rf_del)
+            seq.add_block(rf, gz)
             gy_pre = make_trapezoid(channel='y', area=phase_areas[0], duration=1.4e-3, system=system)
             seq.add_block(gx_pre, gy_pre, gz_reph)
             seq.add_block(make_delay(delay_TE))
@@ -109,7 +109,7 @@ def gre_refscan(seq, meta_file=None, system=Opts(), params=None):
             rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
             rf_phase = divmod(rf_phase + rf_inc, 360.0)[1]
 
-            seq.add_block(rf, gz, rf_del)
+            seq.add_block(rf, gz)
             gy_pre = make_trapezoid(channel='y', area=phase_areas[i], duration=1.4e-3, system=system)
             seq.add_block(gx_pre, gy_pre, gz_reph)
             seq.add_block(make_delay(delay_TE))

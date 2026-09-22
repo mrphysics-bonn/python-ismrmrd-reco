@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 {pulseq|jemris|pg} INPUT [OUTPUT]" >&2
+}
+
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+    usage
+    exit 2
+fi
+
+MODE="$1"
+IN_FILE="$2"
+OUT_FILE="${3:-recon/out.h5}"
+
+case "$MODE" in
+    jemris)
+        CONFIG="bart_jemris"
+        ;;
+    pg)
+        CONFIG="powergrid_pulseq"
+        ;;
+    pulseq)
+        CONFIG="bart_pulseq"
+        if [[ "$IN_FILE" == *.dat ]]; then
+            rm -f /tmp/tmp.h5
+            PARAM_PATH="$(cd -P -- "$(dirname -- "$0")" && pwd -P)/python-ismrmrd-server/parameter_maps"
+            siemens_to_ismrmrd -f "$IN_FILE" \
+                --user-map "$PARAM_PATH/IsmrmrdParameterMap_Siemens_pulseq.xml" \
+                --user-stylesheet "$PARAM_PATH/IsmrmrdParameterMap_Siemens_pulseq.xsl" \
+                -o /tmp/tmp.h5
+            IN_FILE=/tmp/tmp.h5
+        fi
+        ;;
+    *)
+        echo "Unknown reconstruction mode: $MODE" >&2
+        usage
+        exit 2
+        ;;
+esac
+
+rm -f "$OUT_FILE"
+uv run client.py -c "$CONFIG" -o "$OUT_FILE" -G images "$IN_FILE"

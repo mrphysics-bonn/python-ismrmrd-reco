@@ -5,28 +5,42 @@ This repository contains a reconstruction pipeline for MRI data acquired with Pu
 ## Installation
 
 Clone the repository with the submodule: `git clone --recursive https://github.com/mrphysics-bonn/python-ismrmrd-reco.git`.
-A [Python](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and a [Docker](https://docs.docker.com/get-docker/) installation are required to run the reconstruction server. Additionally, the following steps have to be done:
+A [uv](https://docs.astral.sh/uv/) and a [Docker](https://docs.docker.com/get-docker/) installation are required to run the reconstruction server. Additionally, the following steps have to be done:
 1. After Docker installation, add your user to the docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker`)
 2. Pull the Docker image of the reconstruction server from Dockerhub: `docker pull mavel101/bart-reco-server`.  
-3. Python dependencies for the reconstruction are defined in "ismrmrd_client.yml". Run `conda env create -f ismrmrd_client.yml` to install the environment.  
+3. Install the reconstruction dependencies, including the local `python-ismrmrd-server` submodule, with `uv sync`.
 
-Optional dependencies for the creation of MR sequences with PyPulseq [4] are defined in "seqdev.yml". Run `conda env create -f seqdev.yml` to install a new Python environment or run `conda env update -f seqdev.yml -n ismrmrd_client` to add the dependencies to the "ismrmrd_client" environment.
+To activate the virtual environment manually:
+
+```bash
+source .venv/bin/activate
+```
+
+Deactivate it with:
+
+```bash
+deactivate
+```
+
+Activation is optional; commands can also be run directly with `uv run`.
+
+Optional dependencies for the creation of MR sequences with PyPulseq [4] can be installed with `uv sync --extra seqdev`.
 
 ## Quick start guide - from sequence to image
 
 In this quick start, Cartesian and spiral sequences are created with PyPulseq. The raw data collected with this sequence, is reconstructed and images are displayed. 
 
 Creating a sequence:
-1. Activate the Python environment with `conda activate seqdev`.
+1. Install the sequence dependencies with `uv sync --extra seqdev`.
 2. Run the Python scripts with `python write_spiral.py` or `python write_cartesian.py` in the directory "example_sequences/pypulseq". At the top of both scripts, protocol parameters and the sequence filename can be changed. 
 3. A Pulseq file (.seq) is created in the same directory and an MRD (originally ISMRMRD) metadata file (.h5) is created in the folder "dependency/metadata". This metadata file is important for the reconstruction, as raw data obtained from Pulseq sequences does not contain any information, on how the kspace was acquired.
 
 Running a reconstruction:
 1. Start the Docker container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background. You can attach to the container with `docker attach #containerID` (optional, check ID with `docker ps`).
-2. Activate the Python environment with `conda activate ismrmrd_client`.
+2. Run client commands through the uv environment with `uv run`.
 3. Run a reconstruction by sending the data to the server.  
-Example Pulseq reconstruction: `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`. 
-Example JEMRIS reconstruction: `./send_data_jemris.sh example_data/simu/signals_spiralout_clean_slc30.h5 recon/out.h5`.  
+Example Pulseq reconstruction: `./send_data pulseq example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`.
+Example JEMRIS reconstruction: `./send_data jemris example_data/simu/signals_spiralout_clean_slc30.h5 recon/out.h5`.
 5. Logging information and debug files can be found in the "debug" folder.
 6. In this example, the reconstructed image is stored in "recon/out.h5". The image can be viewed by running the Python script "plot_img.py". Images are stored in MRD image format. Image files will not be overwritten, but new images will be appended to existing files.
 
@@ -50,23 +64,22 @@ Pulseq sequence files can be converted to the GE compatible format TOPPE, using 
 
 If you want to build the docker image from the latest Dockerfile in this repository, the following steps are required:
 - Clone the repository and run `git submodule update --init`
-- Run `./build_docker.sh` from the project folder. This builds the docker image on your system.
+- Run `./build_docker` from the project folder. This builds the docker image on your system.
 
-The default docker image contains only CPU based reconstructions. A Docker image with GPU support can be build with: `./build_docker.sh python-ismrmrd-server/ bart_cuda`
+The default docker image contains only CPU based reconstructions. A Docker image with GPU support can be build with: `./build_docker python-ismrmrd-server/ bart_cuda`
 Note that this image is of larger size and that the GPU version needs nvidia-docker to be installed (https://github.com/NVIDIA/nvidia-docker).
 
 The container can be started by executing `./start_docker` from the project folder:
 - `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`). You can attach to the container with `docker attach #containerID`.
-- Use `./start_docker_gpu` for GPU support (nvidia-docker has to be installed)
+- Use `./start_docker --gpu` for GPU support (nvidia-docker has to be installed)
 
 ### Sending data via the client
 
-Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. A conda environment with the client can be installed, by using the provided `ismrmrd_client.yml` using the command `conda env create -f ismrmrd_client.yml`. Afterwards it is activated by running `conda activate ismrmrd_client`.
-Alternatively, the client can be installed in the current environment by running `pip install .` from the "python-ismrmrd-server" folder. The dependencies numpy, h5py and ismrmrd-python will automatically be installed. 
+Reconstruction can be started via the provided `client.py` from the "python-ismrmrd-server" folder. The client and its local submodule dependency are installed by `uv sync`, and commands can be run with `uv run`.
 
 To run an example spiral reconstruction:
 
-- The scripts `send_data_pulseq.sh` (data from MR scanner) and `send_data_jemris.sh` (data from JEMRIS simulations) can be used as a shortcut for sending the data. For example, the command `./send_data_pulseq.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5` reconstructs a spiral dataset.
+- The `send_data` script accepts `pulseq`, `jemris`, or `pg` as its first argument. For example, `./send_data pulseq example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5` reconstructs a spiral dataset.
 - By default, reconstructed data will be located in "recon/out.h5".
 - Reconstructed images can be plotted with the `plot_img.py` script.
 - Debug files (in npy format) and a log file are stored in the "debug" folder
@@ -81,20 +94,20 @@ IMPORTANT: The metadata filename has to be saved in the first user defined strin
 For Siemens data this is can automatically be done at file conversion:
 1. The metadata file should have the same name as the sequence.
 2. The sequence/metadata filename has to be stored in the free text parameter "tFree" of the raw data file. This is automatically done in the newest Pulseq interpreter sequence (v1.4.0).
-3. The raw data is converted to the MRD format with the siemens_to_ismrmrd converter (https://github.com/ismrmrd/siemens_to_ismrmrd). After installation of the converter, `send_data_pulseq.sh` can handle Siemens raw data acquired with the Pulseq sequence. The shell script uses the parameter maps in "python-ismrmrd-server/parameter_maps" for file conversion.
+3. The raw data is converted to the MRD format with the siemens_to_ismrmrd converter (https://github.com/ismrmrd/siemens_to_ismrmrd). After installation of the converter, `send_data pulseq` can handle Siemens raw data acquired with the Pulseq sequence. The script uses the parameter maps in "python-ismrmrd-server/parameter_maps" for file conversion.
 4. Metadata merging is done by the functions "insert_hdr" and "insert_acq" in "python-ismrmrd-server/pulseq_helper.py".
 
 ### Reconstruction of JEMRIS simulation data
 
 Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecting the "-r" option, when running JEMRIS in the command line or by starting the recon in the GUI with the "start reco" button. However, the following prerequisites have to be met:
 - The Docker image of the reconstruction server has to be pulled from Dockerhub (`docker pull mavel101/bart-reco-server`). If JEMRIS is running from the command line, the reconstruction server also has to be started.
-- The `client.py` (and its dependencies) has to be installed in the conda environment, where the JEMRIS simulation is executed. This lets you execute the client from anywhere. It is recommended to use the provided `ismrmrd_client.yml` to create a conda environment for the client. Manual installation of the client is possible by running `pip install .` from the "python-ismrmrd-server" folder.
+- The `client.py` (and its dependencies) has to be installed in the environment where the JEMRIS simulation is executed. This lets you execute the client from anywhere. Run `uv sync` from this repository to install it from the local submodule.
 
-Reconstruction of already simulated data can also be started by running `send_data_jemris.sh` as described in "Sending data via client".
+Reconstruction of already simulated data can also be started by running `./send_data jemris` as described in "Sending data via client".
 
 ### Extend & Modify existing reconstruction
 
-If the scripts `./start_docker_it` or `./start_docker_it_gpu` are used to start the docker container, the reconstruction codebase in the `python-ismrmrd-server` subdirectory is mounted in the active container and an interactive docker session in the bash shell is started. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed. Note, that the dependencies in the codebase might have changed and the latest build of the Docker container might be necessary to run reconstructions.
+Use `./start_docker --interactive` to mount the reconstruction codebase in the active container and start an interactive docker session in the bash shell. Add `--gpu` for GPU support. Run `start_server` within the container to start the reconstruction server. If you leave the session, the container is killed. Note, that the dependencies in the codebase might have changed and the latest build of the Docker container might be necessary to run reconstructions.
 . Changes to the reconstruction scripts will immediately applied in a new reconstruction started. If subscripts are altered, a restart of the reconstruction server might be necessary.
 Some important scripts are explained in more detail:  
 - `server.py`: New reconstruction scripts can be added here and a new configuration name should be assigned. The new reconstruction can be started sending data via `client.py` with the new configuration name by using the "-c" option (see above).
@@ -103,7 +116,7 @@ Some important scripts are explained in more detail:
 
 ## Static offresonance correction & higher order image reconstruction
 
-Static offresonance correction is available via the PowerGrid reconstruction toolbox [7]. For this, a different Docker image is needed, which can be pulled with `docker pull mavel101/bart_pg_gpu` (Nvidia GPU required). Alternatively build the image with `./build_docker.sh python-ismrmrd-server/ bart_pg_gpu`. Run `./start_docker_gpu mavel101/bart_pg_gpu` to start the server. An example reconstruction can be started with `./send_data_pg.sh example_data/scanner/raw_spiralout_gre_fatsat_7T.h5`.  
+Static offresonance correction is available via the PowerGrid reconstruction toolbox [7]. For this, a different Docker image is needed, which can be pulled with `docker pull mavel101/bart_pg_gpu` (Nvidia GPU required). Alternatively build the image with `./build_docker python-ismrmrd-server/ bart_pg_gpu`. Run `./start_docker --gpu mavel101/bart_pg_gpu` to start the server. An example reconstruction can be started with `./send_data pg example_data/scanner/raw_spiralout_gre_fatsat_7T.h5`.
 
 The reconstruction script for a B0-corrected reconstruction is located in "python-ismrmrd-server/powergrid_pulseq.py". It is possible to use an external field map located at "dependency/fmap.npz" (as in the above example) or to calculate a field map from a calibration scan within the same sequence. The unit of the field map has to be rad/s. For more information, contact the author.
 

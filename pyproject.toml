@@ -1,0 +1,23 @@
+[project]
+name = "python-ismrmrd-reco"
+version = "0.1.0"
+requires-python = ">3.11"
+dependencies = [
+    "h5py",
+    "ismrmrd",
+    "numpy",
+    "ismrmrd-client",
+]
+
+[project.optional-dependencies]
+seqdev = [
+    "pypulseq==1.5.0.post1",
+    "spiraltraj",
+]
+
+[tool.uv.sources]
+ismrmrd-client = { path = "python-ismrmrd-server" }
+spiraltraj = { git = "https://github.com/mrphysics-bonn/spiraltraj.git" }
+
+[tool.uv]
+package = false

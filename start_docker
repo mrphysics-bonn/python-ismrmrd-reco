@@ -1,11 +1,66 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if [ "$#" -lt 1 ]; then
-    TAG="mavel101/bart-reco-server"
-else
-    TAG="$1"
+set -euo pipefail
+
+TAG="mavel101/bart-reco-server"
+TAG_SET=false
+GPU=false
+INTERACTIVE=false
+
+usage() {
+    echo "Usage: $0 [--gpu] [--interactive] [IMAGE_TAG]" >&2
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --gpu|-g)
+            GPU=true
+            ;;
+        --interactive|-i)
+            INTERACTIVE=true
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        --*)
+            echo "Unknown option: $1" >&2
+            usage
+            exit 2
+            ;;
+        *)
+            if [[ "$TAG_SET" == true ]]; then
+                echo "Only one image tag may be provided" >&2
+                usage
+                exit 2
+            fi
+            TAG="$1"
+            TAG_SET=true
+            ;;
+    esac
+    shift
+done
+
+if [[ "$GPU" == true && "$TAG_SET" == false ]]; then
+    TAG="bart_cuda"
+elif [[ "$INTERACTIVE" == true && "$TAG_SET" == false ]]; then
+    TAG="bart"
 fi
 
-dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
+ROOT_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
+DOCKER_ARGS=(--user "$(id -u):$(id -g)" -p 9002:9002 -v "$ROOT_DIR:/tmp/share" --rm)
 
-docker run -d -t --user $(id -u):$(id -g) -p 9002:9002 -v $dir:/tmp/share --rm $TAG
+if [[ "$GPU" == true ]]; then
+    DOCKER_ARGS+=(--gpus all)
+fi
+
+if [[ "$INTERACTIVE" == true ]]; then
+    DOCKER_ARGS+=(-it)
+    if [[ -n "$(find "$ROOT_DIR/python-ismrmrd-server" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
+        DOCKER_ARGS+=(-v "$ROOT_DIR/python-ismrmrd-server:/opt/code/python-ismrmrd-server")
+    fi
+    docker run "${DOCKER_ARGS[@]}" "$TAG" bash
+else
+    DOCKER_ARGS+=(-d -t)
+    docker run "${DOCKER_ARGS[@]}" "$TAG"
+fi

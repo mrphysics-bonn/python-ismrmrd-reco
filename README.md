@@ -67,11 +67,10 @@ If you want to build the docker image from the latest Dockerfile in this reposit
 - Run `./build_docker` from the project folder. This builds the docker image on your system.
 
 The default docker image contains only CPU based reconstructions. A Docker image with GPU support can be build with: `./build_docker python-ismrmrd-server/ bart_cuda`
-Note that this image is of larger size and that the GPU version needs nvidia-docker to be installed (https://github.com/NVIDIA/nvidia-docker).
 
 The container can be started by executing `./start_docker` from the project folder:
 - `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`). You can attach to the container with `docker attach #containerID`.
-- Use `./start_docker --gpu` for GPU support (nvidia-docker has to be installed)
+- Use `./start_docker --gpu` for GPU support
 
 ### Sending data via the client
 

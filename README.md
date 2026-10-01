@@ -7,7 +7,7 @@ This repository contains a reconstruction pipeline for MRI data acquired with Pu
 Clone the repository with the submodule: `git clone --recursive https://github.com/mrphysics-bonn/python-ismrmrd-reco.git`.
 A [uv](https://docs.astral.sh/uv/) and a [Docker](https://docs.docker.com/get-docker/) installation are required to run the reconstruction server. Additionally, the following steps have to be done:
 1. After Docker installation, add your user to the docker group (execute `sudo groupadd docker`, `sudo usermod -aG docker $USER` and `newgrp docker`)
-2. Pull the Docker image of the reconstruction server from Dockerhub: `docker pull mavel101/bart-reco-server`.  
+2. Pull the Docker image of the reconstruction server from Dockerhub: `docker pull mavel101/reco_server`.  
 3. Install the reconstruction dependencies, including the local `python-ismrmrd-server` submodule, with `uv sync`.
 
 To activate the virtual environment manually:
@@ -36,7 +36,7 @@ Creating a sequence:
 3. A Pulseq file (.seq) is created in the same directory and an MRD (originally ISMRMRD) metadata file (.h5) is created in the folder "dependency/metadata". This metadata file is important for the reconstruction, as raw data obtained from Pulseq sequences does not contain any information, on how the kspace was acquired.
 
 Running a reconstruction:
-1. Start the Docker container by running `./start_docker mavel101/bart-reco-server`. The reconstruction server is now running in the background. You can attach to the container with `docker attach #containerID` (optional, check ID with `docker ps`).
+1. Start the Docker container by running `./start_docker mavel101/reco_server`. The reconstruction server is now running in the background. You can attach to the container with `docker attach #containerID` (optional, check ID with `docker ps`).
 2. Run client commands through the uv environment with `uv run`.
 3. Run a reconstruction by sending the data to the server.  
 Example Pulseq reconstruction: `./send_data pulseq example_data/scanner/raw_spiralout_gre_fatsat_7T.h5 recon/out.h5`.
@@ -69,8 +69,8 @@ If you want to build the docker image from the latest Dockerfile in this reposit
 The default docker image contains only CPU based reconstructions. A Docker image with GPU support can be build with: `./build_docker python-ismrmrd-server/ bart_cuda`
 
 The container can be started by executing `./start_docker` from the project folder:
-- `./start_docker` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`). You can attach to the container with `docker attach #containerID`.
-- Use `./start_docker --gpu` for GPU support
+- `./start_docker bart` starts the container and runs the reconstruction server in background until it is killed with `docker kill #containerID`, where "#containerID" is the ID of the container (check with `docker ps`). You can attach to the container with `docker attach #containerID`.
+- Use `./start_docker --gpu bart_cuda` for GPU support
 
 ### Sending data via the client
 
@@ -99,7 +99,7 @@ For Siemens data this is can automatically be done at file conversion:
 ### Reconstruction of JEMRIS simulation data
 
 Reconstruction of JEMRIS simulation data can be started within JEMRIS by selecting the "-r" option, when running JEMRIS in the command line or by starting the recon in the GUI with the "start reco" button. However, the following prerequisites have to be met:
-- The Docker image of the reconstruction server has to be pulled from Dockerhub (`docker pull mavel101/bart-reco-server`). If JEMRIS is running from the command line, the reconstruction server also has to be started.
+- The Docker image of the reconstruction server has to be pulled from Dockerhub (`docker pull mavel101/reco_server`). If JEMRIS is running from the command line, the reconstruction server also has to be started.
 - The `client.py` (and its dependencies) has to be installed in the environment where the JEMRIS simulation is executed. This lets you execute the client from anywhere. Run `uv sync` from this repository to install it from the local submodule.
 
 Reconstruction of already simulated data can also be started by running `./send_data jemris` as described in "Sending data via client".

@@ -27,6 +27,8 @@ data.close()
 img_set = imgs[show_set][:]
 if np.iscomplexobj(img_set):
     img_set = abs(img_set)
+if img_set.dtype.names == ('real', 'imag'):
+    img_set = np.hypot(img_set['real'], img_set['imag'])
 
 slices = img_set.shape[0]
 if slices > 1:

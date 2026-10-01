@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-TAG="mavel101/bart-reco-server"
+TAG="mavel101/reco_server"
 TAG_SET=false
 GPU=false
 INTERACTIVE=false
